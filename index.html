@@ -229,6 +229,13 @@ button{cursor:pointer}
           <button class="btn" data-mode="fixe" type="button">Fixe</button>
           <button class="btn" data-mode="noir" type="button">Noir</button>
         </div>
+        <span class="label">Séquence</span>
+        <div class="row" id="fxRow">
+          <button class="btn" data-fx="16" type="button">Montée courte · 16 temps</button>
+          <button class="btn" data-fx="32" type="button">Montée longue · 32 temps</button>
+          <button class="btn" id="fxCancel" type="button" hidden>Annuler</button>
+        </div>
+        <p class="note" id="fxTxt">Fondu qui monte, fondu qui descend, orage de flashs de plus en plus serré, un temps de noir, puis toute la salle repart sur le rythme.</p>
         <span class="label">Couleur de l'écran</span>
         <div class="row" id="colors">
           <button class="btn sw" data-color="blanc" type="button"><i style="--c:#ffffff"></i>Blanc</button>
@@ -300,7 +307,7 @@ button{cursor:pointer}
   const BASE = 'eclaire-lumieres/v1/' + code;
   const me = Math.random().toString(36).slice(2, 10);
 
-  let S = { on: false, mode: 'beat', bpm: 100, t0: now(), color: 'blanc', show: 'logo', names: '', sub: '', lead: 70, screen: false };
+  let S = { on: false, mode: 'beat', bpm: 100, t0: now(), color: 'blanc', show: 'logo', names: '', sub: '', lead: 70, screen: false, fx: null };
   let seq = 0, lastSeq = -1;
 
   function clean(d) {
@@ -314,6 +321,7 @@ button{cursor:pointer}
       color: COLORS[d.color] ? d.color : 'blanc', show: d.show === 'names' ? 'names' : 'logo',
       names: str(d.names), sub: str(d.sub),
       lead: clamp(Number(d.lead) || 0, 0, 300), screen: d.screen === true,
+      fx: d.fx && isFinite(Number(d.fx.t)) && isFinite(Number(d.fx.len)) ? { t: Number(d.fx.t), len: clamp(Number(d.fx.len), 8, 64) } : null,
     };
   }
   function hash(b, seed) {
@@ -331,6 +339,32 @@ button{cursor:pointer}
     if (s.mode === 'etincelles') return hash(Math.floor(x), seed) < 0.3 ? Math.exp(-f * 4.5) : 0.04;
     return Math.exp(-f * 4.5);
   }
+  // Séquence « Montée » (en temps de 32) : fondu montant, plein, fondu descendant,
+  // orage de plus en plus dense, un temps de noir, puis retour au rythme.
+  // Le flash ne se règle pas en intensité : le fondu est collectif, chaque téléphone
+  // a son propre seuil, donc la salle s'allume et s'éteint progressivement.
+  const ease = (x) => x * x * (3 - 2 * x);
+  function fxBeat(s, T) {
+    if (!s.on || !s.fx) return null;
+    const b = (T - s.fx.t) / (60000 / s.bpm);
+    if (b < 0 || b >= s.fx.len) return null;
+    return b * 32 / s.fx.len;
+  }
+  function look(s, T, seed) {
+    const b = fxBeat(s, T);
+    if (b === null) return [level(s, T, seed), s.mode === 'souffle' || reduced];
+    if (b < 8) return [ease(b / 8), true];
+    if (b < 10) return [1, true];
+    if (b < 16) return [1 - ease((b - 10) / 6), true];
+    if (b >= 30.5) return [0, true];
+    const p = (b - 16) / 14, unit = (60000 / s.bpm) * s.fx.len / 32;
+    const slot = Math.max(unit / 2, 400), e = T - s.fx.t, k = Math.floor(e / slot), f = (e - k * slot) / slot;
+    if (hash(k, seed) >= 0.12 + 0.83 * p) return [0, false];
+    const o = hash(k, seed ^ 0x5bd1e995) * 0.2;
+    return [f >= o ? Math.exp(-(f - o) * slot / 70) : 0, false];
+  }
+  const torchFor = (lv, coll, thr) => (coll ? lv > thr : lv > 0.35);
+
   function makeStage(el) {
     const glow = el.querySelector('.glow'), logo = el.querySelector('.logo');
     const names = el.querySelector('.names'), sub = el.querySelector('.sub');
@@ -386,6 +420,7 @@ button{cursor:pointer}
   // ---------------- invité ----------------
   let offset = 0, bestRtt = Infinity, roughDone = false, pending = null, lastHeard = 0;
   const seed = (Math.random() * 2 ** 31) | 0;
+  const thr = 0.06 + 0.88 * Math.random();
   function onState(d) {
     if (role !== 'guest' || !d || typeof d.seq !== 'number') return;
     if (d.seq <= lastSeq && d.boot === lastBoot) return;
@@ -551,7 +586,25 @@ button{cursor:pointer}
   $('#leadUp').addEventListener('click', () => { S.lead = clamp(S.lead + 10, 0, 300); paint(); saveShow(); send(); });
   $('#screenToo').addEventListener('click', () => { S.screen = !S.screen; paint(); saveShow(); send(); });
   $('#start').addEventListener('click', () => { S.on = true; if (S.mode === 'noir') S.mode = 'beat'; paint(); send(); });
-  $('#stop').addEventListener('click', () => { S.on = false; paint(); send(); });
+  $('#fxRow').addEventListener('click', (e) => {
+    const b = e.target.closest('[data-fx]'); if (!b) return;
+    if (!S.on) { S.on = true; if (S.mode === 'noir') S.mode = 'beat'; }
+    rephase();
+    S.fx = { t: S.t0 + beat(), len: Number(b.dataset.fx) };
+    paint(); send();
+  });
+  $('#fxCancel').addEventListener('click', () => { S.fx = null; paint(); send(); });
+  const FXT = 'Fondu qui monte, fondu qui descend, orage de flashs de plus en plus serré, un temps de noir, puis toute la salle repart sur le rythme.';
+  setInterval(() => {
+    if (role !== 'regie') return;
+    const b = fxBeat(S, now());
+    if (S.fx && b === null && now() > S.fx.t) { S.fx = null; send(); }
+    $('#fxCancel').hidden = !S.fx;
+    const left = S.fx ? Math.ceil((S.fx.t + S.fx.len * beat() - now()) / beat()) : 0;
+    $('#fxTxt').textContent = !S.fx ? FXT : b === null ? 'Départ au prochain temps…'
+      : (b < 10 ? 'Fondu qui monte' : b < 16 ? 'Fondu qui descend' : b < 30.5 ? 'Orage' : 'Noir') + ' · retour au rythme dans ' + left + ' temps';
+  }, 200);
+  $('#stop').addEventListener('click', () => { S.on = false; S.fx = null; paint(); send(); });
   $('#modes').addEventListener('click', (e) => { const b = e.target.closest('[data-mode]'); if (b) { S.mode = b.dataset.mode; paint(); saveShow(); send(); } });
   $('#colors').addEventListener('click', (e) => { const b = e.target.closest('[data-color]'); if (b) { S.color = b.dataset.color; paint(); saveShow(); send(); } });
   $('#shows').addEventListener('click', (e) => { const b = e.target.closest('[data-show]'); if (b) { S.show = b.dataset.show; paint(); send(); } });
@@ -736,25 +789,25 @@ button{cursor:pointer}
 
   function frame() {
     if (role === 'regie') {
-      const v = level(S, now() + S.lead, seed);
-      drawPreview(S, v);
-      $('#pTorch').classList.toggle('on', v > 0.35);
+      const [lv, coll] = look(S, now() + S.lead, seed);
+      drawPreview(S, look(S, now(), seed)[0]);
+      $('#pTorch').classList.toggle('on', torchFor(lv, coll, 0.5));
     } else {
       const T = now() + offset;
       const useTorch = entered && torch.ok;
       if (useTorch) {
-        const lv = level(S, T + S.lead, seed);
-        let want = lv > 0.35;
+        const [lv, coll] = look(S, T + S.lead, seed);
+        let want = torchFor(lv, coll, thr);
         if (!want && torch.on && now() - torch.since < 90) want = true;
         if (want !== torch.want) { torch.want = want; pumpTorch(); }
       }
       const screenOn = entered && (!torch.ok || S.screen);
-      drawGuest(S, screenOn ? level(S, T, seed) : 0);
+      drawGuest(S, screenOn ? look(S, T, seed)[0] : 0);
     }
     requestAnimationFrame(frame);
   }
   requestAnimationFrame(frame);
-  window.__eclaire = { get S() { return S; }, get offset() { return offset; }, get torch() { return torch; } };
+  window.__eclaire = { get S() { return S; }, get offset() { return offset; }, get torch() { return torch; }, look, torchFor };
 })();
 </script>
 </body>
