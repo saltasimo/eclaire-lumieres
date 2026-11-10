@@ -1,0 +1,498 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0b0908">
+<title>Invitation · Eclaire</title>
+<meta name="description" content="Invitation de mariage · Eclaire Weddings & Events, Salé">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Aref+Ruqaa:wght@400;700&family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Great+Vibes&family=Manrope:wght@400;600;800&family=Playfair+Display:wght@700;900&display=swap">
+<style>
+/* Card = a tall paper with an arch window cut onto the hall's own stage (the arches are the hall's signature).
+   Maker = form + phone preview; guest = envelope with a wax seal, then the card. */
+:root{
+  --f-script:"Great Vibes","Snell Roundhand",cursive;
+  --f-ar-display:"Aref Ruqaa","Amiri",serif;
+  --f-ar:"Amiri","Geeza Pro",serif;
+  --f-serif:"Cormorant Garamond",Georgia,serif;
+  --f-num:"Playfair Display",Georgia,serif;
+  --f-ui:"Manrope",system-ui,-apple-system,"Segoe UI",sans-serif;
+  /* maker UI */
+  --ui-bg:#0b0908; --ui-panel:#17130f; --ui-raise:#221c16; --ui-ink:#f6f1e7; --ui-mute:#a99f8f; --ui-line:rgba(246,241,231,.15); --ui-gold:#c9a45c; --ui-warn:#e8876f;
+  color-scheme:dark;
+}
+/* the three card palettes */
+.t-nuit{--paper:#0e0b09;--paper2:#1a140f;--ink:#f3ecdf;--soft:#b9ad99;--gold:#d2ad66;--goldDeep:#9b7a3c;--rule:rgba(210,173,102,.45);--btnInk:#0e0b09}
+.t-ivoire{--paper:#f6f0e5;--paper2:#ece3d3;--ink:#2a221a;--soft:#6f6252;--gold:#a8823c;--goldDeep:#7c5f28;--rule:rgba(168,130,60,.5);--btnInk:#f6f0e5}
+.t-emeraude{--paper:#0d2620;--paper2:#123229;--ink:#f1ebdd;--soft:#b3c2b4;--gold:#d6b46e;--goldDeep:#a3843f;--rule:rgba(214,180,110,.45);--btnInk:#0d2620}
+
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%}
+body{background:var(--ui-bg);color:var(--ui-ink);font-family:var(--f-ui);font-size:15px;line-height:1.5;-webkit-tap-highlight-color:transparent}
+[hidden]{display:none!important}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--ui-gold);outline-offset:3px}
+img{max-width:100%;display:block}
+
+/* ================= CARD ================= */
+.card{position:relative;background:linear-gradient(180deg,var(--paper) 0%,var(--paper2) 100%);color:var(--ink);
+  padding:28px 26px 34px;display:grid;justify-items:center;text-align:center;gap:0;overflow:hidden;isolation:isolate}
+.card::before{content:"";position:absolute;inset:10px;border:1px solid var(--rule);border-radius:200px 200px 10px 10px;pointer-events:none;z-index:-1}
+.card .sym{width:30px;height:39px;background:var(--gold);-webkit-mask:url(img/symbol-ivory.png) center/contain no-repeat;mask:url(img/symbol-ivory.png) center/contain no-repeat;margin-top:8px}
+.card .bism{margin:14px 0 0;font-family:var(--f-ar);font-size:17px;color:var(--soft)}
+.arch{position:relative;width:min(78%,300px);aspect-ratio:3/4;margin-top:18px;border-radius:999px 999px 6px 6px;overflow:hidden;
+  box-shadow:0 0 0 1px var(--rule),0 0 0 7px var(--paper),0 0 0 8px var(--rule)}
+.arch img{width:100%;height:100%;object-fit:cover}
+.arch::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 55%,color-mix(in srgb,var(--paper) 60%,transparent))}
+.fam{margin:22px 0 0;display:grid;gap:2px}
+.fam .ar{font-family:var(--f-ar);font-size:18px}
+.fam .fr{font-family:var(--f-serif);font-size:17px;font-style:italic;color:var(--soft)}
+.intro{margin:16px 0 0;display:grid;gap:4px;max-width:30ch}
+.intro .ar{font-family:var(--f-ar);font-size:19px;line-height:1.6}
+.intro .fr{font-family:var(--f-serif);font-size:17px;color:var(--soft);line-height:1.35}
+.names{margin:14px 0 0;font-family:var(--f-script);font-weight:400;font-size:clamp(46px,14vw,62px);line-height:1;color:var(--gold);display:grid;justify-items:center}
+.names i{font-style:normal;font-size:.55em;color:var(--ink);opacity:.8;margin:2px 0}
+.names-ar{margin:10px 0 0;font-family:var(--f-ar-display);font-size:30px;line-height:1.3;color:var(--ink)}
+.when{margin:24px 0 0;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:14px;width:100%;max-width:330px}
+.when .side{font-family:var(--f-serif);font-size:15px;letter-spacing:.18em;text-transform:uppercase;padding-block:8px;border-block:1px solid var(--rule);font-weight:600}
+.when .day{font-family:var(--f-num);font-weight:900;font-size:58px;line-height:.9;color:var(--gold)}
+.when .day small{display:block;font-family:var(--f-serif);font-weight:600;font-size:13px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink);margin-top:6px}
+.date-ar{margin:12px 0 0;font-family:var(--f-ar);font-size:18px}
+.date-fr{margin:2px 0 0;font-family:var(--f-serif);font-size:16px;color:var(--soft);font-style:italic}
+.place{margin:22px 0 0;display:grid;gap:2px}
+.place .lbl{font-size:10px;letter-spacing:.32em;text-transform:uppercase;color:var(--soft);font-weight:600}
+.place .wm{width:170px;aspect-ratio:784/101;background:var(--ink);-webkit-mask:url(img/wordmark-ivory.png) center/contain no-repeat;mask:url(img/wordmark-ivory.png) center/contain no-repeat;margin:6px auto 0}
+.place .city{font-family:var(--f-serif);font-size:15px;color:var(--soft)}
+.note{margin:18px 0 0;font-family:var(--f-serif);font-style:italic;font-size:17px;max-width:30ch}
+.count{margin:26px 0 0;display:flex;gap:10px;justify-content:center}
+.count div{min-width:64px;padding:10px 6px 8px;border:1px solid var(--rule);border-radius:12px;display:grid;gap:2px}
+.count b{font-family:var(--f-num);font-weight:700;font-size:26px;line-height:1;font-variant-numeric:tabular-nums}
+.count span{font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--soft)}
+.count .done{font-family:var(--f-serif);font-size:18px;font-style:italic;border:0}
+.acts{margin:26px 0 0;display:grid;gap:10px;width:100%;max-width:320px}
+.cbtn{display:flex;align-items:center;justify-content:center;gap:10px;min-height:48px;border-radius:999px;border:1px solid var(--gold);background:transparent;color:var(--ink);
+  text-decoration:none;font-family:var(--f-ui);font-size:13px;font-weight:700;letter-spacing:.06em;padding:0 18px}
+.cbtn.main{background:var(--gold);color:var(--btnInk)}
+.cbtn .ar{font-family:var(--f-ar);font-weight:700;font-size:15px;letter-spacing:0}
+.deadline{margin:12px 0 0;font-size:12px;color:var(--soft)}
+.foot{margin:26px 0 0;font-size:10px;letter-spacing:.3em;text-transform:uppercase;color:var(--soft)}
+
+/* ================= GUEST ================= */
+#guest{min-height:100vh;display:grid;justify-items:center;background:#000}
+#guest .bg{position:fixed;inset:0;background:url(img/scene.webp) center/cover;filter:blur(18px) brightness(.45);transform:scale(1.1)}
+#guest .card{width:100%;max-width:480px;min-height:100vh;padding-top:calc(28px + env(safe-area-inset-top,0px));padding-bottom:calc(34px + env(safe-area-inset-bottom,0px))}
+@media (min-width:560px){#guest{padding-block:40px}#guest .card{min-height:0;border-radius:24px;box-shadow:0 30px 80px rgba(0,0,0,.55)}}
+.reveal>*{animation:rise .9s cubic-bezier(.2,.7,.2,1) both}
+.reveal>*:nth-child(2){animation-delay:.08s}.reveal>*:nth-child(3){animation-delay:.16s}.reveal>*:nth-child(4){animation-delay:.24s}
+.reveal>*:nth-child(5){animation-delay:.32s}.reveal>*:nth-child(6){animation-delay:.4s}.reveal>*:nth-child(7){animation-delay:.48s}
+.reveal>*:nth-child(n+8){animation-delay:.56s}
+@keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+
+.env{position:fixed;inset:0;z-index:20;display:grid;place-items:center;align-content:center;gap:26px;text-align:center;
+  background:radial-gradient(120% 80% at 50% 40%,var(--paper2),var(--paper));color:var(--ink);
+  padding:24px max(16px,env(safe-area-inset-right,0px)) 24px max(16px,env(safe-area-inset-left,0px));transition:transform 1s cubic-bezier(.7,0,.2,1),opacity 1s}
+.env.open{transform:translateY(-100%);opacity:.6}
+.env .to{font-size:10px;letter-spacing:.34em;text-transform:uppercase;color:var(--soft);font-weight:600;margin:0}
+.env .who{font-family:var(--f-script);font-size:52px;line-height:1;color:var(--gold);margin:0}
+.seal{width:132px;height:132px;border-radius:50%;border:0;display:grid;place-items:center;position:relative;
+  background:radial-gradient(circle at 35% 30%,#e9c987,var(--gold) 45%,var(--goldDeep) 100%);box-shadow:0 10px 30px rgba(0,0,0,.4),inset 0 -6px 14px rgba(0,0,0,.25);
+  transition:transform .6s cubic-bezier(.3,1.6,.5,1),opacity .5s}
+.seal::before{content:"";position:absolute;inset:10px;border-radius:50%;border:1px dashed rgba(60,40,10,.45)}
+.seal i{width:40px;height:52px;background:#3b2a10;opacity:.75;-webkit-mask:url(img/symbol-ivory.png) center/contain no-repeat;mask:url(img/symbol-ivory.png) center/contain no-repeat}
+.env.open .seal{transform:scale(1.4) rotate(-12deg);opacity:0}
+.env .hint{display:grid;gap:2px;margin:0}
+.env .hint b{font-size:12px;letter-spacing:.24em;text-transform:uppercase}
+.env .hint span{font-family:var(--f-ar);font-size:17px;color:var(--soft)}
+
+.sheet{position:fixed;inset:0;z-index:30;display:grid;align-items:end;justify-items:center;background:rgba(0,0,0,.55)}
+.sheet .panel{width:100%;max-width:480px;background:var(--paper2);color:var(--ink);border-radius:22px 22px 0 0;
+  padding:22px 20px calc(22px + env(safe-area-inset-bottom,0px));display:grid;gap:14px;border-top:1px solid var(--rule)}
+.sheet h2{margin:0;font-family:var(--f-serif);font-size:24px;font-weight:600;text-align:center}
+.sheet h2 span{display:block;font-family:var(--f-ar);font-size:19px;font-weight:400;color:var(--soft)}
+.sheet label{display:grid;gap:6px;font-size:12px;color:var(--soft)}
+.sheet input{background:var(--paper);border:1px solid var(--rule);border-radius:12px;padding:12px 14px;font-size:16px;color:var(--ink);width:100%}
+.stepper{display:flex;align-items:center;justify-content:space-between;border:1px solid var(--rule);border-radius:12px;padding:6px}
+.stepper button{width:42px;height:42px;border-radius:10px;border:0;background:var(--paper);color:var(--ink);font-size:20px}
+.stepper output{font-family:var(--f-num);font-size:24px;font-weight:700}
+.sheet .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.sheet .x{justify-self:center;background:none;border:0;color:var(--soft);font-size:13px;text-decoration:underline;padding:6px}
+.sheet .msg{font-size:12px;color:var(--soft);text-align:center;margin:0}
+
+/* ================= MAKER ================= */
+#maker{max-width:1100px;margin:0 auto;padding-block:calc(24px + env(safe-area-inset-top,0px)) 60px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.mhead{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:10px 24px;margin-bottom:22px}
+.mhead h1{margin:0;font-family:var(--f-num);font-weight:900;font-size:clamp(26px,5vw,36px);line-height:1.1;text-wrap:balance}
+.mhead h1 span{font-family:var(--f-script);font-weight:400;color:var(--ui-gold);font-size:1.15em;margin-right:.15em}
+.mhead p{margin:0;color:var(--ui-mute);max-width:46ch}
+.mgrid{display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:28px;align-items:start}
+.form{display:grid;gap:14px;min-width:0}
+.blk{background:var(--ui-panel);border:1px solid var(--ui-line);border-radius:18px;padding:18px;display:grid;gap:14px;min-width:0}
+.blk h2{margin:0;font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--ui-mute);font-weight:700}
+.f2{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+.fld{display:grid;gap:6px;font-size:12px;color:var(--ui-mute);min-width:0}
+.fld input,.fld textarea{background:var(--ui-bg);border:1px solid var(--ui-line);border-radius:10px;padding:11px 12px;font-size:15px;color:var(--ui-ink);width:100%;min-width:0}
+.fld textarea{resize:vertical;min-height:70px}
+.fld input[dir=rtl],.fld textarea[dir=rtl]{font-family:var(--f-ar);font-size:17px}
+.fld small{color:var(--ui-mute);font-size:11px}
+.req::after{content:" *";color:var(--ui-gold)}
+.check{display:flex;gap:10px;align-items:center;font-size:14px}
+.check input{width:18px;height:18px;accent-color:var(--ui-gold)}
+.tpls{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.tpl{border:1px solid var(--ui-line);background:var(--ui-raise);border-radius:14px;padding:10px;display:grid;gap:8px;justify-items:center;font-size:13px;font-weight:600}
+.tpl i{width:100%;height:54px;border-radius:30px 30px 6px 6px;background:var(--sw);box-shadow:inset 0 0 0 1px var(--ui-line)}
+.tpl[aria-pressed="true"]{border-color:var(--ui-gold);box-shadow:0 0 0 1px var(--ui-gold)}
+.side{position:sticky;top:calc(16px + env(safe-area-inset-top,0px));display:grid;gap:14px}
+.phone{border:1px solid var(--ui-line);border-radius:34px;padding:9px;background:var(--ui-panel)}
+.phone .scr{border-radius:26px;overflow:auto;max-height:min(720px,78vh);scrollbar-width:thin}
+.phone .card{min-height:100%}
+.pill{border:1px solid var(--ui-gold);background:var(--ui-gold);color:#0b0908;font-weight:800;letter-spacing:.12em;text-transform:uppercase;font-size:13px;padding:15px 24px;border-radius:999px;width:100%}
+.err{margin:0;color:var(--ui-warn);font-size:13px}
+.share{display:grid;gap:12px}
+.share .link{display:flex;gap:8px;min-width:0}
+.share .link input{flex:1;min-width:0;background:var(--ui-bg);border:1px solid var(--ui-line);border-radius:10px;padding:10px 12px;font-size:13px;color:var(--ui-ink)}
+.btn{border:1px solid var(--ui-line);background:var(--ui-raise);border-radius:999px;padding:10px 16px;font-size:13px;font-weight:700;color:var(--ui-ink);text-decoration:none;text-align:center;display:inline-flex;align-items:center;justify-content:center;gap:8px}
+.btn.wa{background:#1f8f4e;border-color:#1f8f4e;color:#fff}
+.qrbox{display:grid;grid-template-columns:150px minmax(0,1fr);gap:14px;align-items:center}
+.qrbox .qr{background:#fff;border-radius:12px;padding:10px}
+.qrbox .qr svg{width:100%;height:auto;display:block}
+.qrbox .acts2{display:grid;gap:8px}
+.tip{margin:0;font-size:12px;color:var(--ui-mute)}
+@media (max-width:860px){
+  .mgrid{grid-template-columns:minmax(0,1fr)}
+  .side{position:static}
+  .phone{max-width:400px;margin:0 auto;width:100%}
+}
+@media (max-width:420px){.qrbox{grid-template-columns:minmax(0,1fr)}.qrbox .qr{max-width:200px;margin:0 auto}}
+@media (prefers-reduced-motion:reduce){.reveal>*{animation:none}.env,.seal{transition:none}}
+</style>
+</head>
+<body>
+
+<!-- ================= MARIÉE : créer l'invitation ================= -->
+<main id="maker" hidden>
+  <header class="mhead">
+    <h1><span>Eclaire</span>Votre invitation</h1>
+    <p>Remplissez, regardez l'aperçu, puis envoyez le lien par WhatsApp ou imprimez le QR code.</p>
+  </header>
+
+  <div class="mgrid">
+    <form class="form" id="form" novalidate>
+      <section class="blk">
+        <h2>Modèle</h2>
+        <div class="tpls" id="tpls">
+          <button class="tpl" type="button" data-t="nuit" style="--sw:linear-gradient(#0e0b09,#1a140f);"><i></i>Nuit</button>
+          <button class="tpl" type="button" data-t="ivoire" style="--sw:linear-gradient(#f6f0e5,#ece3d3);"><i></i>Ivoire</button>
+          <button class="tpl" type="button" data-t="emeraude" style="--sw:linear-gradient(#0d2620,#123229);"><i></i>Émeraude</button>
+        </div>
+      </section>
+
+      <section class="blk">
+        <h2>Les mariés</h2>
+        <div class="f2">
+          <label class="fld" for="bf"><span class="req">Prénom de la mariée</span><input id="bf" maxlength="24" placeholder="Salma" autocomplete="off"></label>
+          <label class="fld" for="ba">بالعربية<input id="ba" dir="rtl" maxlength="24" placeholder="سلمى" autocomplete="off"></label>
+          <label class="fld" for="gf"><span class="req">Prénom du marié</span><input id="gf" maxlength="24" placeholder="Youssef" autocomplete="off"></label>
+          <label class="fld" for="ga">بالعربية<input id="ga" dir="rtl" maxlength="24" placeholder="يوسف" autocomplete="off"></label>
+        </div>
+        <div class="f2">
+          <label class="fld" for="ff">Les familles (facultatif)<input id="ff" maxlength="60" placeholder="Les familles Alaoui et Bennani" autocomplete="off"></label>
+          <label class="fld" for="fa">العائلتان (اختياري)<input id="fa" dir="rtl" maxlength="60" placeholder="عائلتا العلوي وبناني" autocomplete="off"></label>
+        </div>
+        <label class="check" for="bism"><input id="bism" type="checkbox" checked>Commencer par « بسم الله الرحمن الرحيم »</label>
+      </section>
+
+      <section class="blk">
+        <h2>Le jour J</h2>
+        <div class="f2">
+          <label class="fld" for="dt"><span class="req">Date</span><input id="dt" type="date"></label>
+          <label class="fld" for="tm"><span class="req">Heure</span><input id="tm" type="time" value="20:00"></label>
+        </div>
+        <label class="fld" for="map">Lien Google Maps de la salle<input id="map" type="url" inputmode="url" placeholder="https://maps.app.goo.gl/…" autocomplete="off"><small>Laissez vide pour utiliser la recherche « Eclaire Salé ».</small></label>
+        <label class="fld" for="nt">Petit mot (facultatif)<textarea id="nt" maxlength="140" placeholder="Votre présence sera notre plus beau cadeau."></textarea></label>
+      </section>
+
+      <section class="blk">
+        <h2>Confirmations</h2>
+        <div class="f2">
+          <label class="fld" for="wa">Numéro WhatsApp qui reçoit les réponses<input id="wa" type="tel" inputmode="tel" placeholder="06 12 34 56 78" autocomplete="off"><small>Les invités répondent par un message WhatsApp déjà rédigé.</small></label>
+          <label class="fld" for="rb">Répondre avant le (facultatif)<input id="rb" type="date"></label>
+        </div>
+      </section>
+
+      <p class="err" id="err" hidden></p>
+      <button class="pill" type="submit">Créer le lien de l'invitation</button>
+
+      <section class="blk share" id="share" hidden>
+        <h2>Votre invitation est prête</h2>
+        <div class="link">
+          <input id="out" readonly aria-label="Lien de l'invitation">
+          <button class="btn" type="button" id="copy">Copier</button>
+        </div>
+        <div class="qrbox">
+          <div class="qr" id="qr"></div>
+          <div class="acts2">
+            <a class="btn wa" id="sendWa" href="#" target="_blank" rel="noopener">Envoyer sur WhatsApp</a>
+            <a class="btn" id="dlQr" href="#" download="invitation-qr.png">Télécharger le QR code</a>
+            <a class="btn" id="openG" href="#" target="_blank" rel="noopener">Voir comme un invité</a>
+          </div>
+        </div>
+        <p class="tip">Le lien contient toute l'invitation : gardez-le, il marche tel quel. Pour modifier, changez le formulaire et recréez le lien.</p>
+      </section>
+    </form>
+
+    <aside class="side">
+      <div class="phone"><div class="scr" id="preview"></div></div>
+    </aside>
+  </div>
+</main>
+
+<!-- ================= INVITÉ ================= -->
+<main id="guest" hidden>
+  <div class="bg" aria-hidden="true"></div>
+  <div id="gcard"></div>
+</main>
+
+<script src="../vendor/qrcode.js"></script>
+<script>
+(() => {
+  const $ = (s, r = document) => r.querySelector(s);
+  const TZ = 'Africa/Casablanca';
+  const TPLS = ['nuit', 'ivoire', 'emeraude'];
+  const pad = (n) => String(n).padStart(2, '0');
+
+  // ---------- data <-> link ----------
+  const b64u = (bytes) => { let s = ''; bytes.forEach((b) => (s += String.fromCharCode(b))); return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); };
+  const unb64u = (s) => { s = s.replace(/-/g, '+').replace(/_/g, '/'); const bin = atob(s); return Uint8Array.from(bin, (c) => c.charCodeAt(0)); };
+  async function pipe(bytes, Stream) { return new Uint8Array(await new Response(new Blob([bytes]).stream().pipeThrough(new Stream('deflate-raw'))).arrayBuffer()); }
+  async function encode(obj) {
+    const raw = new TextEncoder().encode(JSON.stringify(obj));
+    if (window.CompressionStream) { try { return 'z' + b64u(await pipe(raw, CompressionStream)); } catch (e) {} }
+    return 'j' + b64u(raw);
+  }
+  async function decode(s) {
+    const bytes = unb64u(s.slice(1));
+    const raw = s[0] === 'z' ? await pipe(bytes, DecompressionStream) : bytes;
+    return JSON.parse(new TextDecoder().decode(raw));
+  }
+  function clean(o) {
+    const str = (v, n) => (typeof v === 'string' ? v.trim().slice(0, n) : '');
+    const date = /^\d{4}-\d{2}-\d{2}$/.test(o.d) ? o.d : '';
+    const time = /^\d{2}:\d{2}$/.test(o.h) ? o.h : '20:00';
+    let map = str(o.m, 300); if (!/^https:\/\//i.test(map)) map = '';
+    return {
+      t: TPLS.includes(o.t) ? o.t : 'nuit',
+      bf: str(o.bf, 24), ba: str(o.ba, 24), gf: str(o.gf, 24), ga: str(o.ga, 24),
+      ff: str(o.ff, 60), fa: str(o.fa, 60), bi: o.bi !== 0,
+      d: date, h: time, m: map, n: str(o.n, 140),
+      w: str(o.w, 16).replace(/\D/g, ''), r: /^\d{4}-\d{2}-\d{2}$/.test(o.r) ? o.r : '',
+    };
+  }
+
+  // ---------- dates ----------
+  function zonedEpoch(d, h) {
+    // the wedding hour in Morocco, whatever the guest's phone timezone
+    const [Y, M, D] = d.split('-').map(Number), [hh, mm] = h.split(':').map(Number);
+    const guess = Date.UTC(Y, M - 1, D, hh, mm);
+    const parts = new Intl.DateTimeFormat('en-US', { timeZone: TZ, hourCycle: 'h23', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }).formatToParts(new Date(guess));
+    const g = Object.fromEntries(parts.map((p) => [p.type, p.value]));
+    const asTz = Date.UTC(+g.year, +g.month - 1, +g.day, +g.hour % 24, +g.minute);
+    return guess - (asTz - guess);
+  }
+  const noon = (d) => new Date(d + 'T12:00:00Z');
+  const fmt = (d, loc, opt) => new Intl.DateTimeFormat(loc, Object.assign({ timeZone: 'UTC' }, opt)).format(noon(d));
+  const AR = 'ar-MA-u-nu-latn';
+
+  // ---------- card ----------
+  function el(tag, cls, text) { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
+  function mapUrl(x) { return x.m || 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent('Eclaire Weddings & Events Salé'); }
+
+  function renderCard(x, { live = false, guest = false } = {}) {
+    const c = el('article', 'card t-' + x.t);
+    const bride = x.bf || 'Salma', groom = x.gf || 'Youssef';
+    c.append(el('div', 'sym'));
+    if (x.bi) c.append(el('p', 'bism', 'بسم الله الرحمن الرحيم'));
+    const arch = el('div', 'arch'); const im = el('img'); im.src = 'img/arch.webp'; im.alt = 'La scène de la salle Eclaire'; arch.append(im); c.append(arch);
+    if (x.ff || x.fa) { const f = el('div', 'fam'); if (x.fa) f.append(Object.assign(el('span', 'ar', x.fa), { dir: 'rtl' })); if (x.ff) f.append(el('span', 'fr', x.ff)); c.append(f); }
+    const intro = el('div', 'intro');
+    intro.append(Object.assign(el('span', 'ar', x.ff || x.fa ? 'يتشرفون بدعوتكم لحضور حفل زفاف' : 'يتشرفان بدعوتكم لحضور حفل زفافهما'), { dir: 'rtl' }));
+    intro.append(el('span', 'fr', x.ff || x.fa ? 'ont l’honneur de vous convier au mariage de' : 'ont l’honneur de vous convier à leur mariage'));
+    c.append(intro);
+    const nm = el('h1', 'names'); nm.append(el('span', '', bride), el('i', '', '&'), el('span', '', groom)); c.append(nm);
+    if (x.ba || x.ga) c.append(Object.assign(el('p', 'names-ar', (x.ba || bride) + ' و ' + (x.ga || groom)), { dir: 'rtl' }));
+    if (x.d) {
+      const w = el('div', 'when');
+      w.append(el('div', 'side', fmt(x.d, 'fr-FR', { weekday: 'long' })));
+      const day = el('div', 'day', fmt(x.d, 'fr-FR', { day: 'numeric' })); day.append(el('small', '', fmt(x.d, 'fr-FR', { month: 'long' }) + ' ' + x.d.slice(0, 4))); w.append(day);
+      w.append(el('div', 'side', x.h.replace(':', 'h')));
+      c.append(w);
+      c.append(Object.assign(el('p', 'date-ar', fmt(x.d, AR, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }) + ' · ابتداءً من الساعة ' + x.h), { dir: 'rtl' }));
+    } else if (live) c.append(el('p', 'date-fr', 'Choisissez la date'));
+    const pl = el('div', 'place'); pl.append(el('span', 'lbl', 'à la salle · بقاعة'), el('div', 'wm'), el('span', 'city', 'Salé · سلا')); c.append(pl);
+    if (x.n) c.append(el('p', 'note', x.n));
+    if (x.d) { const ct = el('div', 'count'); ct.dataset.at = zonedEpoch(x.d, x.h); c.append(ct); tick(ct); }
+    const acts = el('div', 'acts');
+    if (x.w) { const b = el('button', 'cbtn main'); b.type = 'button'; b.append(el('span', '', 'Confirmer ma présence'), el('span', 'ar', '· تأكيد الحضور')); b.dataset.act = 'rsvp'; acts.append(b); }
+    const m = el('a', 'cbtn'); m.href = mapUrl(x); m.target = '_blank'; m.rel = 'noopener'; m.append(el('span', '', 'Itinéraire'), el('span', 'ar', '· الطريق')); acts.append(m);
+    if (x.d) { const a = el('a', 'cbtn'); a.href = icsUrl(x); a.download = 'mariage-' + slug(bride) + '-' + slug(groom) + '.ics'; a.append(el('span', '', 'Ajouter au calendrier'), el('span', 'ar', '· أضف إلى التقويم')); acts.append(a); }
+    c.append(acts);
+    if (x.r && x.w) c.append(el('p', 'deadline', 'Merci de répondre avant le ' + fmt(x.r, 'fr-FR', { day: 'numeric', month: 'long' }) + ' · يرجى الرد قبل ' + fmt(x.r, AR, { day: 'numeric', month: 'long' })));
+    c.append(el('p', 'foot', 'Eclaire Weddings & Events'));
+    if (guest) c.classList.add('reveal');
+    if (!guest) c.querySelectorAll('a').forEach((a) => a.addEventListener('click', (e) => e.preventDefault()));
+    return c;
+  }
+  const slug = (s) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/gi, '-').toLowerCase() || 'x';
+
+  function tick(ct) {
+    const at = Number(ct.dataset.at), left = at - Date.now();
+    ct.textContent = '';
+    if (left <= 0) { ct.append(el('div', 'done', left > -12 * 3600e3 ? 'C’est aujourd’hui · اليوم' : 'Merci d’avoir été là · شكرا على حضوركم')); return; }
+    const d = Math.floor(left / 864e5), h = Math.floor(left / 36e5) % 24, m = Math.floor(left / 6e4) % 60;
+    for (const [v, l] of [[d, 'Jours · أيام'], [h, 'Heures · ساعات'], [m, 'Min · دقائق']]) { const b = el('div'); b.append(el('b', '', d > 999 ? v : pad(v)), el('span', '', l)); ct.append(b); }
+  }
+  setInterval(() => document.querySelectorAll('.count').forEach(tick), 30000);
+
+  function icsUrl(x) {
+    const s = zonedEpoch(x.d, x.h), e = s + 6 * 3600e3;
+    const z = (t) => new Date(t).toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
+    const esc = (v) => v.replace(/[\\,;]/g, (c) => '\\' + c).replace(/\n/g, '\\n');
+    const title = 'Mariage de ' + (x.bf || 'Salma') + ' & ' + (x.gf || 'Youssef');
+    const ics = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Eclaire//Invitation//FR', 'BEGIN:VEVENT',
+      'UID:' + z(s) + '-' + slug(title) + '@eclaire', 'DTSTAMP:' + z(Date.now()), 'DTSTART:' + z(s), 'DTEND:' + z(e),
+      'SUMMARY:' + esc(title), 'LOCATION:' + esc('Eclaire Weddings & Events, Salé'), 'DESCRIPTION:' + esc(mapUrl(x)),
+      'BEGIN:VALARM', 'TRIGGER:-P1D', 'ACTION:DISPLAY', 'DESCRIPTION:' + esc(title), 'END:VALARM', 'END:VEVENT', 'END:VCALENDAR'].join('\r\n');
+    return 'data:text/calendar;charset=utf-8,' + encodeURIComponent(ics);
+  }
+
+  // ---------- RSVP (WhatsApp) ----------
+  function rsvp(x) {
+    const t = 't-' + x.t, sh = el('div', 'sheet ' + t); sh.setAttribute('role', 'dialog'); sh.setAttribute('aria-modal', 'true');
+    const p = el('div', 'panel');
+    const h = el('h2', '', 'Votre réponse'); h.append(el('span', '', 'ردكم')); p.append(h);
+    const lab = el('label', ''); lab.append('Votre nom · الاسم'); const nameI = el('input'); nameI.id = 'rsvpName'; nameI.maxLength = 40; nameI.autocomplete = 'name'; lab.append(nameI); p.append(lab);
+    const lab2 = el('label', ''); lab2.append('Nombre de personnes · عدد الأشخاص');
+    const st = el('div', 'stepper'); const minus = el('button', '', '−'), out = el('output', '', '1'), plus = el('button', '', '+');
+    minus.type = plus.type = 'button'; minus.ariaLabel = 'Moins'; plus.ariaLabel = 'Plus';
+    let n = 1; const set = (v) => { n = Math.min(10, Math.max(1, v)); out.textContent = n; };
+    minus.onclick = () => set(n - 1); plus.onclick = () => set(n + 1); st.append(minus, out, plus); lab2.append(st); p.append(lab2);
+    const row = el('div', 'row2'); const yes = el('a', 'cbtn main', 'Je serai là · سأحضر'), no = el('a', 'cbtn', 'Je ne pourrai pas · أعتذر');
+    row.append(yes, no); p.append(row);
+    const msg = el('p', 'msg', 'WhatsApp s’ouvre avec votre message prêt : il ne reste qu’à l’envoyer.'); p.append(msg);
+    const x2 = el('button', 'x', 'Fermer'); x2.type = 'button'; p.append(x2);
+    sh.append(p); document.body.append(sh); nameI.focus();
+    const date = x.d ? fmt(x.d, 'fr-FR', { day: 'numeric', month: 'long' }) : '';
+    const go = (ok) => (e) => {
+      const who = nameI.value.trim();
+      if (!who) { e.preventDefault(); nameI.focus(); msg.textContent = 'Écrivez votre nom pour que les mariés sachent qui répond.'; return; }
+      const couple = (x.bf || '') + ' & ' + (x.gf || '');
+      const text = ok
+        ? `Bonjour, c'est ${who}. Je confirme ma présence au mariage de ${couple}${date ? ' le ' + date : ''} : ${n} personne${n > 1 ? 's' : ''}.\nمرحبا، أنا ${who}. أؤكد حضوري لحفل الزفاف: ${n} ${n > 1 ? 'أشخاص' : 'شخص'}.`
+        : `Bonjour, c'est ${who}. Je ne pourrai malheureusement pas être présent(e) au mariage de ${couple}. Tous mes vœux de bonheur !\nمرحبا، أنا ${who}. أعتذر عن الحضور، وأتمنى لكما السعادة.`;
+      e.currentTarget.href = 'https://wa.me/' + x.w + '?text=' + encodeURIComponent(text);
+    };
+    yes.target = no.target = '_blank'; yes.rel = no.rel = 'noopener'; yes.href = no.href = 'https://wa.me/' + x.w;
+    yes.addEventListener('click', go(true)); no.addEventListener('click', go(false));
+    const close = () => sh.remove();
+    x2.onclick = close; sh.addEventListener('click', (e) => { if (e.target === sh) close(); });
+    document.addEventListener('keydown', function esc(e) { if (e.key === 'Escape') { close(); document.removeEventListener('keydown', esc); } });
+  }
+
+  // ---------- guest ----------
+  async function showGuest(code) {
+    let x;
+    try { x = clean(await decode(code)); } catch (e) { x = null; }
+    $('#guest').hidden = false;
+    if (!x || !x.bf || !x.gf) {
+      const c = el('article', 'card t-nuit'); c.append(el('div', 'sym'), el('p', 'intro', 'Ce lien d’invitation est incomplet. Demandez aux mariés de vous le renvoyer.'));
+      $('#gcard').append(c); return;
+    }
+    document.title = 'Mariage de ' + x.bf + ' & ' + x.gf;
+    const env = el('div', 'env t-' + x.t);
+    env.append(el('p', 'to', 'Vous êtes invités · أنتم مدعوون'), el('p', 'who', x.bf + ' & ' + x.gf));
+    const seal = el('button', 'seal'); seal.type = 'button'; seal.ariaLabel = 'Ouvrir l’invitation'; seal.append(el('i')); env.append(seal);
+    const hint = el('p', 'hint'); hint.append(el('b', '', 'Ouvrir l’invitation'), el('span', '', 'افتح الدعوة')); env.append(hint);
+    document.body.append(env);
+    const open = () => {
+      if (env.classList.contains('open')) return;
+      const card = renderCard(x, { guest: true });
+      card.addEventListener('click', (e) => { if (e.target.closest('[data-act=rsvp]')) rsvp(x); });
+      $('#gcard').append(card);
+      env.classList.add('open'); setTimeout(() => env.remove(), 1100);
+    };
+    seal.addEventListener('click', open); env.addEventListener('click', open);
+  }
+
+  // ---------- maker ----------
+  function readForm() {
+    const v = (id) => $('#' + id).value;
+    let w = v('wa').replace(/\D/g, ''); if (w.startsWith('00')) w = w.slice(2); if (w.startsWith('0')) w = '212' + w.slice(1);
+    return clean({ t: state.t, bf: v('bf'), ba: v('ba'), gf: v('gf'), ga: v('ga'), ff: v('ff'), fa: v('fa'), bi: $('#bism').checked ? 1 : 0, d: v('dt'), h: v('tm'), m: v('map'), n: v('nt'), w, r: v('rb') });
+  }
+  const state = { t: 'nuit' };
+  function preview() {
+    const x = readForm();
+    const pv = $('#preview'), top = pv.scrollTop;
+    pv.replaceChildren(renderCard(x, { live: true }));
+    pv.scrollTop = top;
+    document.querySelectorAll('.tpl').forEach((b) => b.setAttribute('aria-pressed', b.dataset.t === state.t));
+    try { localStorage.setItem('eclaire-invite', JSON.stringify(x)); } catch (e) {}
+    $('#share').hidden = true;
+  }
+  function restore() {
+    let x = null; try { x = clean(JSON.parse(localStorage.getItem('eclaire-invite') || 'null') || {}); } catch (e) {}
+    if (!x) return;
+    state.t = x.t;
+    const set = (id, val) => { if (val) $('#' + id).value = val; };
+    set('bf', x.bf); set('ba', x.ba); set('gf', x.gf); set('ga', x.ga); set('ff', x.ff); set('fa', x.fa); set('dt', x.d); set('tm', x.h);
+    set('map', x.m); set('nt', x.n); set('rb', x.r); if (x.w) set('wa', '+' + x.w);
+    $('#bism').checked = x.bi;
+  }
+  async function create(e) {
+    e.preventDefault();
+    const x = readForm(), err = $('#err');
+    const miss = [!x.bf && 'le prénom de la mariée', !x.gf && 'le prénom du marié', !x.d && 'la date'].filter(Boolean);
+    if (miss.length) { err.textContent = 'Il manque ' + miss.join(', ') + '.'; err.hidden = false; return; }
+    if ($('#wa').value && x.w.length < 11) { err.textContent = 'Le numéro WhatsApp semble incomplet. Exemple : 06 12 34 56 78.'; err.hidden = false; return; }
+    err.hidden = true;
+    const url = location.origin + location.pathname + '#i=' + (await encode(x));
+    $('#out').value = url;
+    $('#openG').href = url;
+    const text = `${x.bf} & ${x.gf} vous invitent à leur mariage, le ${fmt(x.d, 'fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })} à la salle Eclaire, Salé.\n${x.ba || x.bf} و ${x.ga || x.gf} يتشرفان بدعوتكم لحفل زفافهما.\n\nOuvrir l'invitation · افتح الدعوة :\n${url}`;
+    $('#sendWa').href = 'https://wa.me/?text=' + encodeURIComponent(text);
+    try {
+      const q = qrcode(0, 'M'); q.addData(url); q.make();
+      $('#qr').innerHTML = q.createSvgTag({ cellSize: 4, margin: 0, scalable: true });
+      $('#dlQr').href = q.createDataURL(10, 4);
+      $('#dlQr').hidden = false;
+    } catch (e2) { $('#qr').textContent = 'Lien trop long pour un QR code : raccourcissez le petit mot.'; $('#dlQr').hidden = true; }
+    $('#share').hidden = false;
+    $('#share').scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
+  async function boot() {
+    const m = location.hash.match(/^#i=([zj][A-Za-z0-9_-]+)$/);
+    if (m) return showGuest(m[1]);
+    $('#maker').hidden = false;
+    $('#dt').min = new Date().toISOString().slice(0, 10);
+    restore();
+    $('#form').addEventListener('input', preview);
+    $('#form').addEventListener('change', preview);
+    $('#tpls').addEventListener('click', (e) => { const b = e.target.closest('[data-t]'); if (b) { state.t = b.dataset.t; preview(); } });
+    $('#form').addEventListener('submit', create);
+    $('#copy').addEventListener('click', async () => {
+      const i = $('#out');
+      try { await navigator.clipboard.writeText(i.value); $('#copy').textContent = 'Copié'; }
+      catch (e) { i.select(); $('#copy').textContent = 'Sélectionné'; }
+      setTimeout(() => ($('#copy').textContent = 'Copier'), 1600);
+    });
+    preview();
+  }
+  addEventListener('hashchange', () => location.reload());
+  boot();
+})();
+</script>
+</body>
+</html>
