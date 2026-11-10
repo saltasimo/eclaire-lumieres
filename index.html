@@ -146,7 +146,7 @@ button{cursor:pointer}
     <p class="warn" id="gateTxt">Le flash de votre téléphone va s'allumer au rythme de la musique, en même temps que toute la salle.</p>
     <button class="pill" id="enter" type="button">Allumer mon flash</button>
     <p>Autorisez la caméra quand le téléphone le demande : elle sert seulement à allumer le flash. Rien n'est filmé ni envoyé.</p>
-    <p>Lumière clignotante : déconseillé aux personnes photosensibles.</p>
+    <p>Flashs rapides (stroboscope) : déconseillé aux personnes photosensibles ou épileptiques.</p>
     <a class="textlink" href="#regie">Ouvrir la régie</a>
   </div>
 
@@ -222,6 +222,7 @@ button{cursor:pointer}
           <button class="btn sq" id="leadUp" type="button" aria-label="Plus d'avance">+</button>
         </div>
         <div class="row">
+          <button class="btn" id="strobeBtn" type="button" aria-pressed="true">Stroboscope · flashs rapides</button>
           <button class="btn" id="screenToo" type="button" aria-pressed="false">L'écran clignote aussi</button>
         </div>
         <p class="note">Si les flashs arrivent après la musique, augmentez l'avance. Les téléphones sans flash utilisent l'écran.</p>
@@ -321,7 +322,7 @@ button{cursor:pointer}
   const BASE = 'eclaire-lumieres/v1/' + code;
   const me = Math.random().toString(36).slice(2, 10);
 
-  let S = { on: false, silent: false, mode: 'auto', d: 1, style: 'beat', hit: 0, bpm: 100, t0: now(), color: 'blanc', show: 'logo', names: '', sub: '', lead: 70, screen: false, fx: null };
+  let S = { on: false, silent: false, strobe: true, mode: 'auto', d: 1, style: 'beat', hit: 0, bpm: 100, t0: now(), color: 'blanc', show: 'logo', names: '', sub: '', lead: 70, screen: false, fx: null };
   let seq = 0, lastSeq = -1;
 
   function clean(d) {
@@ -330,7 +331,7 @@ button{cursor:pointer}
     const bpm = Number(d.bpm), t0 = Number(d.t0);
     if (!isFinite(bpm) || !isFinite(t0)) return null;
     return {
-      on: d.on === true, silent: d.silent === true, mode: MODES.includes(d.mode) ? d.mode : 'beat',
+      on: d.on === true, silent: d.silent === true, strobe: d.strobe !== false, mode: MODES.includes(d.mode) ? d.mode : 'beat',
       d: clamp(Number(d.d) || 0, 0, 1), style: STYLES.includes(d.style) ? d.style : 'beat', hit: isFinite(Number(d.hit)) ? Number(d.hit) : 0,
       bpm: clamp(bpm, MIN_BPM, MAX_BPM), t0,
       color: COLORS[d.color] ? d.color : 'blanc', show: d.show === 'names' ? 'names' : 'logo',
@@ -377,14 +378,28 @@ button{cursor:pointer}
       const br = 0.8 + 0.2 * Math.sin(2 * Math.PI * (T - s.t0) / (8 * beatMs));
       return [d * br, true];
     }
-    if (s.style === 'storm') {
-      const slot = Math.max(beatMs / 2, 400), k = Math.floor((T - s.t0) / slot), f = (T - s.t0) / slot - k;
-      if (hash(k, seed) >= 0.08 + 0.9 * d) return [0, false];
+    if (s.style === 'storm') return stormLook(s, T, seed, d, beatMs);
+    const x = (T - s.t0) / beatMs, k = Math.floor(x), f = x - k;
+    return [hash(k, seed) < 0.1 + 0.9 * d ? Math.exp(-f * 4.5) : 0, false];
+  }
+  // Orage. Stroboscope activé : chaque téléphone tire des rafales de flashs rapides
+  // (6 à 11 par seconde), de plus en plus longues et nombreuses ; à la fin toute la
+  // salle stroboscope ensemble, en phase. Désactivé : orage doux, 3 flashs/s au plus.
+  const square = (ms, hz) => ((ms * hz / 1000) % 1 < 0.45 ? 1 : 0);
+  function stormLook(s, T, seed, p, unit) {
+    p = clamp(p, 0, 1);
+    if (!s.strobe) {
+      const slot = Math.max(unit / 2, 400), k = Math.floor((T - s.t0) / slot), f = (T - s.t0) / slot - k;
+      if (hash(k, seed) >= 0.12 + 0.83 * p) return [0, false];
       const o = hash(k, seed ^ 0x5bd1e995) * 0.2;
       return [f >= o ? Math.exp(-(f - o) * slot / 70) : 0, false];
     }
-    const x = (T - s.t0) / beatMs, k = Math.floor(x), f = x - k;
-    return [hash(k, seed) < 0.1 + 0.9 * d ? Math.exp(-f * 4.5) : 0, false];
+    if (p > 0.82) return [square(T - s.t0, p > 0.93 ? 10 : 8), false];
+    const k = Math.floor((T - s.t0) / unit), e0 = T - s.t0 - k * unit;
+    if (hash(k, seed) >= 0.3 + 0.7 * p) return [0, false];
+    const n = 2 + Math.round(p * 5), hz = 6 + 4 * p, start = hash(k, seed ^ 0x2f6b) * 0.2 * unit, e = e0 - start;
+    if (e < 0 || e >= n * 1000 / hz) return [0, false];
+    return [square(e, hz), false];
   }
   function look(s, T, seed) {
     if (s.silent) return [0, false];
@@ -394,11 +409,7 @@ button{cursor:pointer}
     if (b < 10) return [1, true];
     if (b < 16) return [1 - ease((b - 10) / 6), true];
     if (b >= 30.5) return [0, true];
-    const p = (b - 16) / 14, unit = (60000 / s.bpm) * s.fx.len / 32;
-    const slot = Math.max(unit / 2, 400), e = T - s.fx.t, k = Math.floor(e / slot), f = (e - k * slot) / slot;
-    if (hash(k, seed) >= 0.12 + 0.83 * p) return [0, false];
-    const o = hash(k, seed ^ 0x5bd1e995) * 0.2;
-    return [f >= o ? Math.exp(-(f - o) * slot / 70) : 0, false];
+    return stormLook(s, T, seed, (b - 16) / 14, (60000 / s.bpm) * s.fx.len / 32);
   }
   const torchFor = (lv, coll, thr) => (coll ? lv > thr : lv > 0.35);
 
@@ -594,11 +605,12 @@ button{cursor:pointer}
     $('#start').hidden = S.on; $('#stop').hidden = !S.on;
     $('#leadOut').textContent = S.lead + ' ms';
     $('#screenToo').setAttribute('aria-pressed', S.screen);
+    $('#strobeBtn').setAttribute('aria-pressed', S.strobe);
     document.querySelectorAll('#modes .btn').forEach((b) => b.setAttribute('aria-pressed', b.dataset.mode === S.mode));
     document.querySelectorAll('#colors .btn').forEach((b) => b.setAttribute('aria-pressed', b.dataset.color === S.color));
     document.querySelectorAll('#shows .btn').forEach((b) => b.setAttribute('aria-pressed', b.dataset.show === S.show));
   }
-  function saveShow() { store.set('eclaire-show', JSON.stringify({ names: S.names, sub: S.sub, lead: S.lead, screen: S.screen, color: S.color, mode: S.mode, calib })); }
+  function saveShow() { store.set('eclaire-show', JSON.stringify({ names: S.names, sub: S.sub, lead: S.lead, screen: S.screen, strobe: S.strobe, color: S.color, mode: S.mode, calib })); }
 
   let taps = [];
   const tapBtn = $('#tap');
@@ -622,6 +634,7 @@ button{cursor:pointer}
   $('#nudgeFwd').addEventListener('click', () => { calib += 20; S.t0 += 20; saveShow(); send(); });
   $('#leadDown').addEventListener('click', () => { S.lead = clamp(S.lead - 10, 0, 300); paint(); saveShow(); send(); });
   $('#leadUp').addEventListener('click', () => { S.lead = clamp(S.lead + 10, 0, 300); paint(); saveShow(); send(); });
+  $('#strobeBtn').addEventListener('click', () => { S.strobe = !S.strobe; paint(); saveShow(); send(); });
   $('#screenToo').addEventListener('click', () => { S.screen = !S.screen; paint(); saveShow(); send(); });
   $('#start').addEventListener('click', () => { S.on = true; if (S.mode === 'noir') S.mode = 'beat'; paint(); send(); });
   $('#fxRow').addEventListener('click', (e) => {
@@ -865,7 +878,7 @@ button{cursor:pointer}
 
   // ---------------- démarrage ----------------
   function setupRegie() {
-    try { const o = JSON.parse(store.get('eclaire-show') || '{}'); ['names', 'sub', 'color', 'mode'].forEach((k) => { if (typeof o[k] === 'string') S[k] = o[k]; }); if (isFinite(o.lead)) S.lead = o.lead; if (typeof o.screen === 'boolean') S.screen = o.screen; if (isFinite(o.calib)) calib = o.calib; } catch (e) {}
+    try { const o = JSON.parse(store.get('eclaire-show') || '{}'); ['names', 'sub', 'color', 'mode'].forEach((k) => { if (typeof o[k] === 'string') S[k] = o[k]; }); if (isFinite(o.lead)) S.lead = o.lead; if (typeof o.screen === 'boolean') S.screen = o.screen; if (typeof o.strobe === 'boolean') S.strobe = o.strobe; if (isFinite(o.calib)) calib = o.calib; } catch (e) {}
     S = clean(S) || S;
     if (S.names) S.show = 'names';
     $('#fNames').value = S.names; $('#fSub').value = S.sub;
@@ -921,7 +934,7 @@ button{cursor:pointer}
         let want = live && torchFor(lv, coll, thr);
         if (S.hit && S.hit !== seenHit) { seenHit = S.hit; if (T - S.hit < 500 && T - S.hit >= 0) hitUntil = now() + 170; }
         if (now() < hitUntil && S.on && live && !S.silent) want = true;
-        if (!want && torch.on && now() - torch.since < 90) want = true;
+        if (!want && torch.on && now() - torch.since < (S.strobe ? 35 : 90)) want = true;
         if (want !== torch.want) { torch.want = want; pumpTorch(); }
       }
       const screenOn = entered && (!torch.ok || S.screen);
