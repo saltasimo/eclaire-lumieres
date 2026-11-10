@@ -106,6 +106,13 @@ button{cursor:pointer}
 .side{display:grid;gap:12px;position:sticky;top:calc(16px + env(safe-area-inset-top,0px))}
 .phone{border:1px solid var(--line);border-radius:26px;padding:7px;background:var(--panel)}
 .phone .stage{aspect-ratio:9/17;border-radius:20px;font-size:9px}
+.room{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:12px;display:grid;gap:8px}
+.room canvas{width:100%;aspect-ratio:1;display:block}
+.room span{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--mute);font-weight:600;text-align:center}
+.vibe{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center;font-size:13px;color:var(--mute)}
+.vibe b{color:var(--ink);font-weight:700}
+.vibe .bar{flex:1 1 120px;height:6px;border-radius:3px;background:var(--night);overflow:hidden;min-width:80px}
+.vibe .bar i{display:block;height:100%;width:0;background:var(--ok)}
 .qr{background:#fff;border-radius:14px;padding:12px;display:grid;justify-items:center;gap:6px;color:#111}
 .qr svg{width:100%;height:auto;display:block}
 .qr span{font-size:11px;letter-spacing:.18em;text-transform:uppercase;font-weight:800}
@@ -182,6 +189,7 @@ button{cursor:pointer}
         <div class="tempo">
           <div class="ear" id="ear" hidden>
             <div class="meter" aria-hidden="true"><i id="meter"></i></div>
+            <div class="vibe"><span>Ambiance <b id="vibeTxt">—</b></span><span class="bar" aria-hidden="true"><i id="vibeBar"></i></span></div>
             <p class="earTxt" id="earTxt">Écoute…</p>
             <div class="conf" id="conf" title="Fiabilité du rythme détecté"><i></i><i></i><i></i><i></i><i></i></div>
             <label class="file" id="fileBox" for="fFile" hidden>Chanson à jouer depuis cet appareil<input id="fFile" type="file" accept="audio/*"></label>
@@ -222,6 +230,7 @@ button{cursor:pointer}
       <section class="block">
         <span class="label">Effet</span>
         <div class="row" id="modes">
+          <button class="btn" data-mode="auto" type="button">Auto · suit la musique</button>
           <button class="btn" data-mode="beat" type="button">Battement</button>
           <button class="btn" data-mode="demi" type="button">Un temps sur deux</button>
           <button class="btn" data-mode="etincelles" type="button">Étincelles</button>
@@ -270,6 +279,10 @@ button{cursor:pointer}
           </div>
         </div>
       </div>
+      <div class="room">
+        <canvas id="room" width="300" height="300" aria-label="Simulation de 100 téléphones dans la salle"></canvas>
+        <span>La salle · 100 flashs simulés</span>
+      </div>
       <div class="qr">
         <div id="qr"></div>
         <span>Scannez pour participer</span>
@@ -292,7 +305,8 @@ button{cursor:pointer}
   const store = { get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }, set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} } };
 
   const COLORS = { blanc: '#ffffff', or: '#f2c96b', rose: '#f6a9b4', ambre: '#ff9a3d' };
-  const MODES = ['beat', 'demi', 'etincelles', 'souffle', 'fixe', 'noir'];
+  const MODES = ['auto', 'beat', 'demi', 'etincelles', 'souffle', 'fixe', 'noir'];
+  const STYLES = ['calm', 'beat', 'storm'];
   const MAX_BPM = 180, MIN_BPM = 50;
 
   const params = new URLSearchParams(location.search);
@@ -307,7 +321,7 @@ button{cursor:pointer}
   const BASE = 'eclaire-lumieres/v1/' + code;
   const me = Math.random().toString(36).slice(2, 10);
 
-  let S = { on: false, mode: 'beat', bpm: 100, t0: now(), color: 'blanc', show: 'logo', names: '', sub: '', lead: 70, screen: false, fx: null };
+  let S = { on: false, mode: 'auto', d: 1, style: 'beat', hit: 0, bpm: 100, t0: now(), color: 'blanc', show: 'logo', names: '', sub: '', lead: 70, screen: false, fx: null };
   let seq = 0, lastSeq = -1;
 
   function clean(d) {
@@ -317,6 +331,7 @@ button{cursor:pointer}
     if (!isFinite(bpm) || !isFinite(t0)) return null;
     return {
       on: d.on === true, mode: MODES.includes(d.mode) ? d.mode : 'beat',
+      d: clamp(Number(d.d) || 0, 0, 1), style: STYLES.includes(d.style) ? d.style : 'beat', hit: isFinite(Number(d.hit)) ? Number(d.hit) : 0,
       bpm: clamp(bpm, MIN_BPM, MAX_BPM), t0,
       color: COLORS[d.color] ? d.color : 'blanc', show: d.show === 'names' ? 'names' : 'logo',
       names: str(d.names), sub: str(d.sub),
@@ -350,9 +365,30 @@ button{cursor:pointer}
     if (b < 0 || b >= s.fx.len) return null;
     return b * 32 / s.fx.len;
   }
+  // Mode Auto : la régie mesure l'énergie de la musique et envoie une densité d (0..1)
+  // et un style. Calme : la salle luit, d = part des téléphones allumés.
+  // Rythme : sur chaque temps, une part d des téléphones flashe. Montée : orage de
+  // densité d. Drop : toute la salle flashe d'un coup.
+  function autoLook(s, T, seed) {
+    if (s.hit && T - s.hit >= 0 && T - s.hit < 200) return [1, false];
+    const beatMs = 60000 / s.bpm, d = s.d;
+    if (reduced) return [d, true];
+    if (s.style === 'calm') {
+      const br = 0.8 + 0.2 * Math.sin(2 * Math.PI * (T - s.t0) / (8 * beatMs));
+      return [d * br, true];
+    }
+    if (s.style === 'storm') {
+      const slot = Math.max(beatMs / 2, 400), k = Math.floor((T - s.t0) / slot), f = (T - s.t0) / slot - k;
+      if (hash(k, seed) >= 0.08 + 0.9 * d) return [0, false];
+      const o = hash(k, seed ^ 0x5bd1e995) * 0.2;
+      return [f >= o ? Math.exp(-(f - o) * slot / 70) : 0, false];
+    }
+    const x = (T - s.t0) / beatMs, k = Math.floor(x), f = x - k;
+    return [hash(k, seed) < 0.1 + 0.9 * d ? Math.exp(-f * 4.5) : 0, false];
+  }
   function look(s, T, seed) {
     const b = fxBeat(s, T);
-    if (b === null) return [level(s, T, seed), s.mode === 'souffle' || reduced];
+    if (b === null) return s.mode === 'auto' && s.on ? autoLook(s, T, seed) : [level(s, T, seed), s.mode === 'souffle' || reduced];
     if (b < 8) return [ease(b / 8), true];
     if (b < 10) return [1, true];
     if (b < 16) return [1 - ease((b - 10) / 6), true];
@@ -445,6 +481,7 @@ button{cursor:pointer}
   }
 
   const drawGuest = makeStage($('#gStage'));
+  let seenHit = 0, hitUntil = 0;
   let entered = false, lock = null;
   async function keepAwake() {
     try { if (entered && navigator.wakeLock && document.visibilityState === 'visible') lock = await navigator.wakeLock.request('screen'); } catch (e) {}
@@ -631,24 +668,24 @@ button{cursor:pointer}
       ring = new Float32Array(N); ringT = new Float64Array(N);
       const lo = actx.createBiquadFilter(); lo.type = 'lowpass'; lo.frequency.value = 150;
       const hi = actx.createBiquadFilter(); hi.type = 'highpass'; hi.frequency.value = 2500;
-      const mg = actx.createChannelMerger(2);
-      const pr = actx.createScriptProcessor(HOP, 2, 1);
+      const mg = actx.createChannelMerger(3);
+      const pr = actx.createScriptProcessor(HOP, 3, 1);
       const mute = actx.createGain(); mute.gain.value = 0;
       lo.connect(mg, 0, 0); hi.connect(mg, 0, 1); mg.connect(pr); pr.connect(mute); mute.connect(actx.destination);
       pr.onaudioprocess = onAudio;
-      chain = { lo, hi, pr };
+      chain = { lo, hi, pr, mg };
     }
     if (actx.state === 'suspended') actx.resume().catch(() => {});
     return actx;
   }
-  const feed = (node) => { node.connect(chain.lo); node.connect(chain.hi); };
+  const feed = (node) => { node.connect(chain.lo); node.connect(chain.hi); node.connect(chain.mg, 0, 2); };
 
   function onAudio(e) {
     if (src === 'tap') return;
-    const a = e.inputBuffer.getChannelData(0), b = e.inputBuffer.getChannelData(1);
-    let el = 0, eh = 0;
-    for (let i = 0; i < a.length; i++) { el += a[i] * a[i]; eh += b[i] * b[i]; }
-    el /= a.length; eh /= a.length;
+    const a = e.inputBuffer.getChannelData(0), b = e.inputBuffer.getChannelData(1), c3 = e.inputBuffer.getChannelData(2);
+    let el = 0, eh = 0, ef = 0;
+    for (let i = 0; i < a.length; i++) { el += a[i] * a[i]; eh += b[i] * b[i]; ef += c3[i] * c3[i]; }
+    el /= a.length; eh /= a.length; ef /= a.length;
     const t = now();
     anchor = Math.min(anchor + 0.002, t - frames * hopMs); frames++;
     let ts = anchor + frames * hopMs - hopMs;
@@ -660,6 +697,7 @@ button{cursor:pointer}
     lvl = Math.max(Math.sqrt(el + eh), lvl * 0.92);
     if (el + eh < 1e-6) { o = 0; if (!quietSince) quietSince = t; } else quietSince = 0;
     ring[wi] = o; ringT[wi] = ts; wi = (wi + 1) % N; if (filled < N) filled++;
+    dynHop(el, eh, ef, o, t);
     if (t - lastAn > 500) { lastAn = t; analyze(); }
   }
 
@@ -717,7 +755,53 @@ button{cursor:pointer}
   }
 
   function stopLive() { if (liveStream) { liveStream.getTracks().forEach((t) => t.stop()); liveStream = null; } if (liveNode) { liveNode.disconnect(); liveNode = null; } }
+  // ---- énergie de la musique : ce qui monte fait monter la lumière, ce qui tombe la fait tomber
+  const DY = { init: false, bS: 0, hS: 0, fS: 0, bQ: 0, bF: 0, bC: 0, hF: 0, hC: 0, fF: 0, fC: 0, aS: 0, aC: 1e-3, I: 0, hist: [], lastPush: 0, style: 'beat', want: 'beat', wantSince: 0, holdUntil: 0, lastHit: 0, lastSent: { d: -1, style: '' } };
+  function dynReset() { DY.init = false; DY.hist = []; }
+  function dynHop(el, eh, ef, o, t) {
+    if (ef < 1e-8) return;                       // silence : on ne fausse pas les repères
+    const b = 10 * Math.log10(el + 1e-10), h = 10 * Math.log10(eh + 1e-10), f = 10 * Math.log10(ef + 1e-10);
+    if (!DY.init) Object.assign(DY, { init: true, bS: b, hS: h, fS: f, bQ: b, bF: b - 7, bC: b + 7, hF: h - 7, hC: h + 7, fF: f - 7, fC: f + 7, aS: 0, aC: 1e-3, I: 0.5 });
+    const a = 1 - Math.exp(-hopMs / 250), aq = 1 - Math.exp(-hopMs / 70), aa = 1 - Math.exp(-hopMs / 1500);
+    DY.bS += (b - DY.bS) * a; DY.hS += (h - DY.hS) * a; DY.fS += (f - DY.fS) * a; DY.bQ += (b - DY.bQ) * aq;
+    DY.aS += (o - DY.aS) * aa;
+    const dec = 0.3 * hopMs / 1000;              // les repères suivent la soirée (0,3 dB/s)
+    for (const [v, F, C] of [['bS', 'bF', 'bC'], ['hS', 'hF', 'hC'], ['fS', 'fF', 'fC']]) { DY[C] = Math.max(DY[v], DY[C] - dec); DY[F] = Math.min(DY[v], DY[F] + dec); }
+    DY.aC = Math.max(DY.aS, DY.aC * Math.exp(-hopMs / 60000));
+    const nz = (v, F, C) => clamp((v - DY[F]) / Math.max(DY[C] - DY[F], 14), 0, 1);
+    const bI = nz(DY.bS, 'bF', 'bC'), hI = nz(DY.hS, 'hF', 'hC'), fI = nz(DY.fS, 'fF', 'fC'), bQ = nz(DY.bQ, 'bF', 'bC');
+    const actI = clamp((DY.aS - 0.15) / 0.55, 0, 1);   // l'onset est un écart de log : échelle absolue
+    const raw = 0.35 * fI + 0.2 * bI + 0.45 * actI;   // volume + basses + activité rythmique
+    DY.I += (raw - DY.I) * (1 - Math.exp(-hopMs / (raw > DY.I ? 250 : 700)));
+    if (t - DY.lastPush < 100) return;
+    DY.lastPush = t;
+    DY.hist.push({ t, bI, hI }); while (DY.hist.length && t - DY.hist[0].t > 6000) DY.hist.shift();
+    const avg = (k, t0, t1) => { let s = 0, n = 0; for (const e of DY.hist) if (e.t >= t - t0 && e.t < t - t1) { s += e[k]; n++; } return n ? s / n : null; };
+    let d, style, hit = false;
+    const bassBefore = avg('bI', 2000, 300), hiNow = avg('hI', 1500, 0), hiBefore = avg('hI', 4000, 1500), bassNow = avg('bI', 1500, 0);
+    if (quietSince && t - quietSince > 1500) { style = 'calm'; d = 0; }
+    else if (bassBefore !== null && t - DY.lastHit > 4000 && ((bassBefore < 0.45 && bQ > 0.78) || (bQ - bassBefore > 0.22 && bQ > 0.75) || (DY.style === 'storm' && bQ > 0.8))) { hit = true; style = 'beat'; d = 1; }
+    else if (t < DY.holdUntil) { style = 'beat'; d = Math.max(0.85, clamp((DY.I - 0.3) / 0.55, 0, 1)); }
+    else if (hiBefore !== null && hiNow > 0.35 && ((bassNow < 0.5 && hiNow - hiBefore > 0.07) || (DY.style === 'storm' && bassNow < 0.75 && hiNow >= hiBefore - 0.03))) { style = 'storm'; d = clamp(0.2 + 0.8 * (t - (DY.style === 'storm' ? DY.stormStart : t)) / 8000, 0.2, 1); }
+    else if (DY.I < 0.38) { style = 'calm'; d = clamp(DY.I * 1.5, 0.05, 0.6); }
+    else { style = 'beat'; d = clamp((DY.I - 0.3) / 0.55, 0, 1); }
+    if (hit) { DY.lastHit = t; DY.holdUntil = t + 2500; DY.style = 'beat'; DY.want = 'beat'; S.hit = Math.round(t - 40); }
+    else if (style !== DY.style) {
+      if (style !== DY.want) { DY.want = style; DY.wantSince = t; }
+      else if (t - DY.wantSince > (style === 'storm' ? 500 : 900)) { DY.style = style; if (style === 'storm') DY.stormStart = t; }
+    } else DY.want = style;
+    S.style = DY.style;
+    S.d = Math.round((DY.style === style ? d : DY.style === 'calm' ? Math.min(d, 0.6) : d) * 100) / 100;
+    $('#vibeTxt').textContent = hit ? 'Drop' : { calm: 'Calme', beat: 'Rythme', storm: 'Montée' }[DY.style];
+    $('#vibeBar').style.width = (DY.I * 100).toFixed(0) + '%';
+    if (hit || DY.style !== DY.lastSent.style || Math.abs(S.d - DY.lastSent.d) >= 0.05) {
+      DY.lastSent = { d: S.d, style: DY.style };
+      if (S.mode === 'auto') send(hit);
+    }
+  }
+
   async function setSrc(s) {
+    dynReset(); if (s === 'tap') { S.d = 1; S.style = 'beat'; $('#vibeTxt').textContent = '—'; }
     earErr(''); src = s; resetEar();
     const p = $('#player');
     $('#tap').hidden = s !== 'tap'; $('#ear').hidden = s === 'tap';
@@ -787,17 +871,38 @@ button{cursor:pointer}
   setInterval(ping, 5000);
   for (let i = 1; i <= 4; i++) setTimeout(ping, i * 600);
 
+  const roomCv = $('#room'), roomCx = roomCv.getContext('2d');
+  const sims = Array.from({ length: 100 }, (_, i) => ({ seed: (Math.random() * 2 ** 31) | 0, thr: 0.06 + 0.88 * Math.random(), x: i % 10, y: (i / 10) | 0 }));
+  function drawRoom() {
+    const T = now(), w = roomCv.width, c = w / 10;
+    roomCx.fillStyle = '#0b0908'; roomCx.fillRect(0, 0, w, w);
+    for (const p of sims) {
+      const [lv, coll] = look(S, T, p.seed);
+      const on = torchFor(lv, coll, p.thr);
+      const cx = p.x * c + c / 2, cy = p.y * c + c / 2;
+      if (on) {
+        const g = roomCx.createRadialGradient(cx, cy, 0, cx, cy, c * 0.9);
+        g.addColorStop(0, 'rgba(255,250,235,.95)'); g.addColorStop(1, 'rgba(255,250,235,0)');
+        roomCx.fillStyle = g; roomCx.fillRect(cx - c, cy - c, c * 2, c * 2);
+      }
+      roomCx.fillStyle = on ? '#fff' : '#2a241d';
+      roomCx.beginPath(); roomCx.arc(cx, cy, c * 0.16, 0, 7); roomCx.fill();
+    }
+  }
   function frame() {
     if (role === 'regie') {
       const [lv, coll] = look(S, now() + S.lead, seed);
       drawPreview(S, look(S, now(), seed)[0]);
       $('#pTorch').classList.toggle('on', torchFor(lv, coll, 0.5));
+      drawRoom();
     } else {
       const T = now() + offset;
       const useTorch = entered && torch.ok;
       if (useTorch) {
         const [lv, coll] = look(S, T + S.lead, seed);
         let want = torchFor(lv, coll, thr);
+        if (S.hit && S.hit !== seenHit) { seenHit = S.hit; if (T - S.hit < 500 && T - S.hit >= 0) hitUntil = now() + 170; }
+        if (now() < hitUntil && S.on) want = true;
         if (!want && torch.on && now() - torch.since < 90) want = true;
         if (want !== torch.want) { torch.want = want; pumpTorch(); }
       }
