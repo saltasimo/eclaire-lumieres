@@ -261,7 +261,7 @@ img{max-width:100%;display:block}
           <label class="fld" for="ff">Les familles<input id="ff" maxlength="60" placeholder="Les familles Alaoui et Bennani" autocomplete="off"></label>
           <label class="fld" for="fa">العائلتان<input id="fa" dir="rtl" maxlength="60" placeholder="عائلتا العلوي وبناني" autocomplete="off"></label>
         </div>
-        <label class="check" for="bism"><input id="bism" type="checkbox" checked>Ajouter « بسم الله الرحمن الرحيم »</label>
+        <label class="fld" for="op">Phrase d'ouverture (facultatif)<input id="op" dir="auto" maxlength="90" placeholder="Une phrase, un verset… en haut de l'invitation" autocomplete="off"></label>
         <label class="fld" for="nt">Mot de bienvenue<textarea id="nt" maxlength="200" placeholder="Nous voulons partager avec vous la joie du plus beau jour de notre vie."></textarea></label>
       </section>
 
@@ -369,7 +369,7 @@ img{max-width:100%;display:block}
     const cols = Array.isArray(o.c) ? o.c.slice(0, 5).filter((c) => typeof c === 'string' && /^#[0-9a-f]{6}$/i.test(c)) : DEF_COLS;
     return {
       bf: str(o.bf, 24), ba: str(o.ba, 24), gf: str(o.gf, 24), ga: str(o.ga, 24),
-      ff: str(o.ff, 60), fa: str(o.fa, 60), bi: o.bi !== 0, n: str(o.n, 200),
+      ff: str(o.ff, 60), fa: str(o.fa, 60), o: str(o.o, 90), n: str(o.n, 200),
       d: isDate(o.d) ? o.d : '', h: isTime(o.h) ? o.h : '20:00', m: map,
       p: prog, c: cols, ct: str(o.ct, 120),
       w: str(o.w, 16).replace(/\D/g, ''), r: isDate(o.r) ? o.r : '',
@@ -513,7 +513,7 @@ img{max-width:100%;display:block}
 
     // 1. the letter
     const L = el('header', 'letter');
-    if (x.bi) L.append(el('p', 'bism', 'بسم الله الرحمن الرحيم'));
+    if (x.o) { const op = el('p', 'bism', x.o); op.dir = 'auto'; L.append(op); }
     L.append(mono(b, g));
     if (x.d) L.append(el('p', 'date', longDate(x.d)));
     const nm = el('h1', 'names'); nm.append(el('span', '', b), el('i', '', '&'), el('span', '', g)); L.append(nm);
@@ -661,7 +661,7 @@ img{max-width:100%;display:block}
     let w = v('wa').replace(/\D/g, ''); if (w.startsWith('00')) w = w.slice(2); if (w.startsWith('0')) w = '212' + w.slice(1);
     const p = [...document.querySelectorAll('.prow')].map((r) => { const [t, l] = r.querySelectorAll('input'); return [t.value, l.value]; });
     const c = [...document.querySelectorAll('#cols input[type=color]')].map((i) => i.value);
-    return clean({ bf: v('bf'), ba: v('ba'), gf: v('gf'), ga: v('ga'), ff: v('ff'), fa: v('fa'), bi: $('#bism').checked ? 1 : 0, n: v('nt'), d: v('dt'), h: v('tm'), m: v('map'), p, c, ct: v('dct'), w, r: v('rb') });
+    return clean({ bf: v('bf'), ba: v('ba'), gf: v('gf'), ga: v('ga'), ff: v('ff'), fa: v('fa'), o: v('op'), n: v('nt'), d: v('dt'), h: v('tm'), m: v('map'), p, c, ct: v('dct'), w, r: v('rb') });
   }
   let pvTimer = 0;
   function preview() {
@@ -686,7 +686,7 @@ img{max-width:100%;display:block}
     const set = (id, val) => { if (val) $('#' + id).value = val; };
     set('bf', x.bf); set('ba', x.ba); set('gf', x.gf); set('ga', x.ga); set('ff', x.ff); set('fa', x.fa); set('nt', x.n);
     set('dt', x.d); set('tm', x.h); set('map', x.m); set('dct', x.ct); set('rb', x.r); if (x.w) set('wa', '+' + x.w);
-    $('#bism').checked = x.bi;
+    set('op', x.o);
     $('#prows').replaceChildren(...x.p.map(progRow));
     $('#cols').replaceChildren(...x.c.map(colInput));
   }
