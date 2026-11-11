@@ -279,14 +279,6 @@ img{max-width:100%;display:block}
 
   <div class="mgrid">
     <form class="form" id="form" novalidate>
-      <section class="blk">
-        <h2>Le style</h2><p class="sub">Choisissez votre papier</p>
-        <div class="tpls" id="tpls">
-          <button class="tpl" type="button" data-t="ivoire" style="--sw:linear-gradient(90deg,#f6f1e9 62%,#b0915a 62%)"><i></i>Ivoire</button>
-          <button class="tpl" type="button" data-t="sable" style="--sw:linear-gradient(90deg,#efe6da 62%,#9d8669 62%)"><i></i>Sable</button>
-          <button class="tpl" type="button" data-t="poudre" style="--sw:linear-gradient(90deg,#f7f0ec 62%,#b8948a 62%)"><i></i>Poudré</button>
-        </div>
-      </section>
 
       <section class="blk">
         <h2>Les mariés</h2><p class="sub">Prénoms en français et en arabe</p>
@@ -643,7 +635,6 @@ img{max-width:100%;display:block}
   function restore() {
     let x; try { x = JSON.parse(localStorage.getItem('eclaire-invite-v3') || 'null'); } catch (e) {}
     x = clean(x || {});
-    state.t = x.t;
     const set = (id, val) => { if (val) $('#' + id).value = val; };
     set('bf', x.bf); set('ba', x.ba); set('gf', x.gf); set('ga', x.ga); set('ff', x.ff); set('fa', x.fa); set('nt', x.n);
     set('dt', x.d); set('tm', x.h); set('map', x.m); set('dct', x.ct); set('rb', x.r); if (x.w) set('wa', '+' + x.w);
@@ -679,7 +670,6 @@ img{max-width:100%;display:block}
     restore();
     $('#form').addEventListener('input', preview);
     $('#form').addEventListener('change', preview);
-    $('#tpls').addEventListener('click', (e) => { const b = e.target.closest('[data-t]'); if (b) { state.t = b.dataset.t; preview(); } });
     $('#addRow').addEventListener('click', () => { if (document.querySelectorAll('.prow').length < 7) { $('#prows').append(progRow()); preview(); } });
     $('#addCol').addEventListener('click', () => { if (document.querySelectorAll('#cols input').length < 5) { $('#cols').append(colInput('#c8b49a')); preview(); } });
     $('#delCol').addEventListener('click', () => { const l = $('#cols').lastElementChild; if (l) { l.remove(); preview(); } });
