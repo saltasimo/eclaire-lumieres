@@ -271,7 +271,6 @@ img{max-width:100%;display:block}
           <label class="fld" for="dt"><span class="req">Date</span><input id="dt" type="date"></label>
           <label class="fld" for="tm"><span class="req">Arrivée des invités</span><input id="tm" type="time" value="20:00"></label>
         </div>
-        <label class="fld" for="map">Lien Google Maps<input id="map" type="url" inputmode="url" placeholder="https://maps.app.goo.gl/…" autocomplete="off"><small>Laissez vide pour utiliser la recherche « Eclaire Salé ».</small></label>
       </section>
 
       <section class="blk">
@@ -288,14 +287,6 @@ img{max-width:100%;display:block}
         <p class="tip">Retirez toutes les couleurs pour ne pas afficher de dress code.</p>
       </section>
 
-      <section class="blk">
-        <h2>Les réponses</h2><p class="sub">Confirmation des invités</p>
-        <div class="f2">
-          <label class="fld" for="wa">WhatsApp qui reçoit les réponses<input id="wa" type="tel" inputmode="tel" placeholder="06 12 34 56 78" autocomplete="off"></label>
-          <label class="fld" for="rb">Répondre avant le<input id="rb" type="date"></label>
-        </div>
-        <p class="tip">Le formulaire de l'invité ouvre WhatsApp avec sa réponse déjà écrite.</p>
-      </section>
 
       <p class="err" id="err" hidden></p>
       <button class="go" type="submit">Créer mon invitation</button>
@@ -658,10 +649,9 @@ img{max-width:100%;display:block}
   function colInput(c) { const lab = el('label'); const i = el('input'); i.type = 'color'; i.value = c; i.setAttribute('aria-label', 'Couleur du dress code'); lab.append(i); return lab; }
   function readForm() {
     const v = (id) => $('#' + id).value;
-    let w = v('wa').replace(/\D/g, ''); if (w.startsWith('00')) w = w.slice(2); if (w.startsWith('0')) w = '212' + w.slice(1);
     const p = [...document.querySelectorAll('.prow')].map((r) => { const [t, l] = r.querySelectorAll('input'); return [t.value, l.value]; });
     const c = [...document.querySelectorAll('#cols input[type=color]')].map((i) => i.value);
-    return clean({ bf: v('bf'), ba: v('ba'), gf: v('gf'), ga: v('ga'), ff: v('ff'), fa: v('fa'), o: v('op'), n: v('nt'), d: v('dt'), h: v('tm'), m: v('map'), p, c, ct: v('dct'), w, r: v('rb') });
+    return clean({ bf: v('bf'), ba: v('ba'), gf: v('gf'), ga: v('ga'), ff: v('ff'), fa: v('fa'), o: v('op'), n: v('nt'), d: v('dt'), h: v('tm'), p, c, ct: v('dct') });
   }
   let pvTimer = 0;
   function preview() {
@@ -685,7 +675,7 @@ img{max-width:100%;display:block}
     x = clean(x || {});
     const set = (id, val) => { if (val) $('#' + id).value = val; };
     set('bf', x.bf); set('ba', x.ba); set('gf', x.gf); set('ga', x.ga); set('ff', x.ff); set('fa', x.fa); set('nt', x.n);
-    set('dt', x.d); set('tm', x.h); set('map', x.m); set('dct', x.ct); set('rb', x.r); if (x.w) set('wa', '+' + x.w);
+    set('dt', x.d); set('tm', x.h); set('dct', x.ct);
     set('op', x.o);
     $('#prows').replaceChildren(...x.p.map(progRow));
     $('#cols').replaceChildren(...x.c.map(colInput));
@@ -695,7 +685,6 @@ img{max-width:100%;display:block}
     const x = readForm(), err = $('#err');
     const miss = [!x.bf && 'le prénom de la mariée', !x.gf && 'le prénom du marié', !x.d && 'la date'].filter(Boolean);
     if (miss.length) { err.textContent = 'Il manque ' + miss.join(', ') + '.'; err.hidden = false; return; }
-    if ($('#wa').value && x.w.length < 11) { err.textContent = 'Le numéro WhatsApp semble incomplet. Exemple : 06 12 34 56 78.'; err.hidden = false; return; }
     err.hidden = true;
     const url = location.origin + location.pathname + '#i=' + (await encode(x));
     $('#out').value = url; $('#openG').href = url;
