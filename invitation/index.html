@@ -257,14 +257,11 @@ img{max-width:100%;display:block}
   <header class="fhead"><p class="brand">Personnaliser</p><h2>Vos informations</h2><p>Chaque changement apparaît aussitôt sur le téléphone.</p></header>
     <form class="form" id="form" novalidate>
       <section class="blk">
-        <h2>Les mariés</h2><p class="sub">Prénoms en français et en arabe</p>
+        <h2>Les mariés</h2><p class="sub">Vos prénoms</p>
         <div class="f2">
           <label class="fld" for="bf"><span class="req">La mariée</span><input id="bf" maxlength="24" placeholder="Salma" autocomplete="off"></label>
-          <label class="fld" for="ba">العروسة<input id="ba" dir="rtl" maxlength="24" placeholder="سلمى" autocomplete="off"></label>
           <label class="fld" for="gf"><span class="req">Le marié</span><input id="gf" maxlength="24" placeholder="Youssef" autocomplete="off"></label>
-          <label class="fld" for="ga">العريس<input id="ga" dir="rtl" maxlength="24" placeholder="يوسف" autocomplete="off"></label>
           <label class="fld" for="ff">Les familles<input id="ff" maxlength="60" placeholder="Les familles Alaoui et Bennani" autocomplete="off"></label>
-          <label class="fld" for="fa">العائلتان<input id="fa" dir="rtl" maxlength="60" placeholder="عائلتا العلوي وبناني" autocomplete="off"></label>
         </div>
         <label class="fld" for="op">Phrase d'ouverture (facultatif)<input id="op" dir="auto" maxlength="90" placeholder="Une phrase, un verset… en haut de l'invitation" autocomplete="off"></label>
         <label class="fld" for="nt">Mot de bienvenue<textarea id="nt" maxlength="200" placeholder="Nous voulons partager avec vous la joie du plus beau jour de notre vie."></textarea></label>
@@ -439,11 +436,10 @@ img{max-width:100%;display:block}
     top.append(mono(b, g));
     if (x.d) top.append(el('p', 'date', longDate(x.d)));
     const nm = el('h1', 'names'); nm.append(el('span', '', b), el('i', '', '&'), el('span', '', g)); top.append(nm);
-    if (x.ba || x.ga) top.append(el('p', 'names-ar', (x.ba || b) + ' و ' + (x.ga || g)));
     const btn = el('button', 'seal-btn'); btn.type = 'button'; btn.setAttribute('aria-label', 'Ouvrir l\u2019invitation'); btn.innerHTML = sealSVG(initial(b), initial(g));
     const bot = el('div', 'cv-bot');
     bot.append(el('p', 'caps', 'vous invitent à leur mariage'));
-    const tap = el('p', 'tap'); tap.append('Touchez le sceau pour ouvrir', el('span', '', 'اضغط على الختم لفتح الدعوة')); bot.append(tap, sprig());
+    const tap = el('p', 'tap'); tap.append('Touchez le sceau pour ouvrir'); bot.append(tap, sprig());
     const wrap = el('div', 'cv-wrap'); wrap.append(top, btn); cv.append(wrap, bot);
     const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
     const open = () => {
@@ -476,16 +472,13 @@ img{max-width:100%;display:block}
     let s = sec();
     s.append(el('h2', 'scrh', 'Chers parents et amis !'));
     if (x.ff) s.append(el('p', 'caps soft', x.ff));
-    if (x.fa) s.append(el('p', 'p ar', x.fa));
     s.append(el('p', 'p', x.n || 'Nous voulons partager avec vous la joie du plus beau jour de notre vie.'));
-    s.append(el('p', 'p ar', x.ff || x.fa ? 'يتشرفون بدعوتكم لحضور حفل زفاف أبنائهم، ومشاركتهم فرحة هذا اليوم.' : 'يسعدنا أن نشارككم فرحة أجمل يوم في حياتنا.'));
     if (x.d) {
       s.append(el('p', 'p', 'La fête aura lieu le'));
       s.append(el('p', 'scrd', fmt(x.d, 'fr-FR', { weekday: 'long', day: 'numeric', month: 'long' }) + ' ' + x.d.slice(0, 4)));
-      s.append(el('p', 'p ar', fmt(x.d, AR, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })));
       const ac = el('p', 'caps', 'Accueil des invités à '); ac.append(el('span', 'tm', x.h.replace(':', 'h'))); s.append(ac);
     }
-    s.append(el('hr', 'rule'), el('p', 'caps', 'à la salle'), el('div', 'wm'), el('p', 'caps soft', 'Salé · Maroc'), el('p', 'p ar', 'قاعة إكلير للحفلات · سلا'));
+    s.append(el('hr', 'rule'), el('p', 'caps', 'à la salle'), el('div', 'wm'), el('p', 'caps soft', 'Salé · Maroc'));
     inv.append(gallery([['img/salle.webp', 'La salle Eclaire'], ['img/scene.webp', 'La scène'], ['img/diner.webp', 'Le dîner'], ['img/table.webp', 'Une table dressée']]));
     s = sec(); s.style.paddingTop = '20px';
     const ma = el('a', 'btnline', 'Voir sur la carte'); ma.href = mapUrl(x); ma.target = '_blank'; ma.rel = 'noopener'; s.append(ma);
@@ -515,12 +508,10 @@ img{max-width:100%;display:block}
     if (x.w) {
       s = sec(); s.append(el('h2', 'scrh', 'Votre réponse'));
       s.append(el('p', 'caps', x.r ? 'Merci de confirmer votre présence avant le ' + fmt(x.r, 'fr-FR', { day: 'numeric', month: 'long' }) : 'Merci de confirmer votre présence'));
-      if (x.r) s.append(el('p', 'p ar', 'يرجى تأكيد حضوركم قبل ' + fmt(x.r, AR, { day: 'numeric', month: 'long' })));
       s.append(rsvpForm(x));
     }
     // 7. closing
     s = sec(); s.append(el('hr', 'rule'), el('p', 'caps soft', 'Avec amour'), el('h2', 'scrh', b + ' & ' + g));
-    if (x.ba || x.ga) s.append(el('p', 'p ar', 'بكل حب، ' + (x.ba || b) + ' و ' + (x.ga || g)));
     s.append(sprig());
     const ft = el('footer', 'foot'); ft.append(el('span', 'sym'), el('span', '', 'Eclaire Weddings & Events')); inv.append(ft);
     return inv;
@@ -616,7 +607,7 @@ img{max-width:100%;display:block}
     const v = (id) => $('#' + id).value;
     const p = [...document.querySelectorAll('.prow')].map((r) => { const [t, l] = r.querySelectorAll('input'); return [t.value, l.value]; });
     const c = [...document.querySelectorAll('#cols input[type=color]')].map((i) => i.value);
-    return clean({ bf: v('bf'), ba: v('ba'), gf: v('gf'), ga: v('ga'), ff: v('ff'), fa: v('fa'), o: v('op'), n: v('nt'), d: v('dt'), h: v('tm'), p, c, ct: v('dct') });
+    return clean({ bf: v('bf'), gf: v('gf'), ff: v('ff'), o: v('op'), n: v('nt'), d: v('dt'), h: v('tm'), p, c, ct: v('dct') });
   }
   let pvTimer = 0, pvCode = '';
   const VIEWS = { env: '?preview=1' };
@@ -627,7 +618,7 @@ img{max-width:100%;display:block}
     $('#share').hidden = true;
     clearTimeout(pvTimer);
     pvTimer = setTimeout(async () => {
-      const y = Object.assign({}, x, { bf: x.bf || 'Salma', gf: x.gf || 'Youssef', ba: x.ba || (x.bf ? '' : 'سلمى'), ga: x.ga || (x.gf ? '' : 'يوسف'), d: x.d || defaultDate() });
+      const y = Object.assign({}, x, { bf: x.bf || 'Salma', gf: x.gf || 'Youssef', d: x.d || defaultDate() });
       pvCode = await encode(y); loadPhones();
     }, 450);
   }
@@ -641,7 +632,7 @@ img{max-width:100%;display:block}
     let x; try { x = JSON.parse(localStorage.getItem('eclaire-invite-v4') || 'null'); } catch (e) {}
     x = clean(x || {});
     const set = (id, val) => { if (val) $('#' + id).value = val; };
-    set('bf', x.bf); set('ba', x.ba); set('gf', x.gf); set('ga', x.ga); set('ff', x.ff); set('fa', x.fa); set('nt', x.n);
+    set('bf', x.bf); set('gf', x.gf); set('ff', x.ff); set('nt', x.n);
     set('dt', x.d); set('tm', x.h); set('dct', x.ct);
     set('op', x.o);
     $('#prows').replaceChildren(...x.p.map(progRow));
@@ -655,7 +646,7 @@ img{max-width:100%;display:block}
     err.hidden = true;
     const url = location.origin + location.pathname + '#i=' + (await encode(x));
     $('#out').value = url; $('#openG').href = url;
-    const text = `${x.bf} & ${x.gf} vous invitent à leur mariage, le ${fmt(x.d, 'fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })} à la salle Eclaire, Salé.\n${x.ba || x.bf} و ${x.ga || x.gf} يتشرفان بدعوتكم لحفل زفافهما.\n\nOuvrir l'invitation · افتح الدعوة :\n${url}`;
+    const text = `${x.bf} & ${x.gf} vous invitent à leur mariage, le ${fmt(x.d, 'fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })} à la salle Eclaire, Salé.\n\nOuvrir l'invitation :\n${url}`;
     $('#sendWa').href = 'https://wa.me/?text=' + encodeURIComponent(text);
     try {
       const q = qrcode(0, 'L'); q.addData(url); q.make();
