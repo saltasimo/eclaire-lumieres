@@ -163,6 +163,11 @@ img{max-width:100%;display:block}
 .phone iframe{position:absolute;left:0;top:0;width:393px;height:852px;border:0;transform:scale(var(--k));transform-origin:0 0;background:var(--linen)}
 .phone .island{position:absolute;margin-top:calc(11px * var(--k));width:calc(118px * var(--k));height:calc(34px * var(--k));border-radius:20px;background:#0f0d0c;z-index:2;pointer-events:none}
 .phone figcaption{margin-top:6px;font-size:11.5px;letter-spacing:.24em;text-transform:uppercase;color:var(--m-ink);opacity:.75}
+.langs{display:inline-flex;border:1px solid rgba(43,38,34,.35);background:rgba(255,255,255,.35)}
+.langs button{border:0;background:transparent;padding:9px 16px;font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:#2b2622}
+.langs button + button{border-left:1px solid rgba(43,38,34,.25)}
+.langs button[aria-pressed="true"]{background:#2b2622;color:#f7f3ec}
+.share .langs{justify-self:center}
 .replay{border:1px solid rgba(59,52,44,.35);background:rgba(255,255,255,.4);padding:9px 18px;font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--m-ink)}
 .wrap{max-width:1060px;margin:0 auto;padding:60px max(16px,env(safe-area-inset-left,0px)) 80px}
 .fhead{display:grid;justify-items:center;text-align:center;gap:6px;margin-bottom:34px}
@@ -247,6 +252,7 @@ img{max-width:100%;display:block}
     </ul>
   </div>
   <div class="hr" id="hr">
+    <div class="langs" id="pvLang" role="group" aria-label="Langue de l'aperçu"><button type="button" data-l="fr" aria-pressed="true">Français</button><button type="button" data-l="en" aria-pressed="false">English</button><button type="button" data-l="es" aria-pressed="false">Español</button></div>
     <div class="phones" id="phones">
         <figure class="phone" data-v="env"><div class="screen"><iframe title="Aperçu : l'enveloppe"></iframe></div><span class="island" aria-hidden="true"></span><figcaption>Aperçu · touchez le sceau</figcaption></figure>
     </div>
@@ -294,7 +300,9 @@ img{max-width:100%;display:block}
       <button class="go" type="submit">Créer mon invitation</button>
 
       <section class="blk share" id="share" hidden>
-        <h2>Elle est prête</h2><p class="sub">Partagez votre invitation</p>
+        <h2>Elle est prête</h2><p class="sub">Choisissez la langue de chaque invité</p>
+        <div class="langs" id="shLang" role="group" aria-label="Langue de l'invitation à envoyer"><button type="button" data-l="fr" aria-pressed="true">Français</button><button type="button" data-l="en" aria-pressed="false">English</button><button type="button" data-l="es" aria-pressed="false">Español</button></div>
+        <p class="tip" id="shTip">Lien en français : envoyez-le à vos invités francophones.</p>
         <div class="link">
           <input id="out" readonly aria-label="Lien de l'invitation">
           <button class="btn" type="button" id="copy">Copier</button>
@@ -354,7 +362,7 @@ img{max-width:100%;display:block}
       ff: str(o.ff, 60), fa: str(o.fa, 60), o: str(o.o, 90), n: str(o.n, 200),
       d: isDate(o.d) ? o.d : '', h: isTime(o.h) ? o.h : '20:00', m: map,
       p: prog, c: cols, ct: str(o.ct, 120),
-      w: str(o.w, 16).replace(/\D/g, ''), r: isDate(o.r) ? o.r : '',
+      w: str(o.w, 16).replace(/\D/g, ''), r: isDate(o.r) ? o.r : '', l: T[o.l] ? o.l : 'fr',
     };
   }
 
@@ -368,7 +376,39 @@ img{max-width:100%;display:block}
   }
   const fmt = (d, loc, opt) => new Intl.DateTimeFormat(loc, Object.assign({ timeZone: 'UTC' }, opt)).format(new Date(d + 'T12:00:00Z'));
   const AR = 'ar-MA-u-nu-latn';
-  const longDate = (d) => fmt(d, 'fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
+  // ---------- languages: one invitation, sent in French, English or Spanish ----------
+  const T = {
+    fr: { loc: 'fr-FR', h: true, invite: 'vous invitent à leur mariage', tap: 'Touchez le sceau pour ouvrir', open: 'Ouvrir l\u2019invitation',
+      dear: 'Chers parents et amis !', welcome: 'Nous voulons partager avec vous la joie du plus beau jour de notre vie.', party: 'La fête aura lieu le',
+      at: 'Accueil des invités à ', hall: 'à la salle', city: 'Salé · Maroc', map: 'Voir sur la carte', prog: 'Le programme', dress: 'Dress code',
+      dressTxt: 'Nous serions ravis que vous suiviez les couleurs de notre soirée', before: 'avant le mariage, il reste', cal: 'Ajouter au calendrier',
+      units: ['jours', 'heures', 'min', 'sec'], today: 'C\u2019est aujourd\u2019hui', thanks: 'Merci d\u2019avoir été là', love: 'Avec amour',
+      prev: 'Photo précédente', next: 'Photo suivante', title: 'Mariage de', bad: 'Ce lien d\u2019invitation est incomplet. Demandez aux mariés de vous le renvoyer.',
+      prog0: ['Accueil des invités', 'Entrée des mariés', 'Dîner', 'Le gâteau', 'Soirée dansante'],
+      wa: (b, g, d, u) => `${b} & ${g} vous invitent à leur mariage, le ${d} à la salle Eclaire, Salé.\n\nOuvrir l'invitation :\n${u}` },
+    en: { loc: 'en-GB', h: false, invite: 'invite you to their wedding', tap: 'Tap the seal to open', open: 'Open the invitation',
+      dear: 'Dear family and friends!', welcome: 'We would love to share with you the joy of the most beautiful day of our lives.', party: 'The celebration will take place on',
+      at: 'Guests welcome from ', hall: 'at the hall', city: 'Salé · Morocco', map: 'View on the map', prog: 'The programme', dress: 'Dress code',
+      dressTxt: 'We would be delighted if you followed the colours of our evening', before: 'until the wedding', cal: 'Add to calendar',
+      units: ['days', 'hours', 'min', 'sec'], today: 'It\u2019s today', thanks: 'Thank you for being with us', love: 'With love',
+      prev: 'Previous photo', next: 'Next photo', title: 'Wedding of', bad: 'This invitation link is incomplete. Please ask the couple to send it again.',
+      prog0: ['Guests arrive', 'Entrance of the newlyweds', 'Dinner', 'The cake', 'Dancing'],
+      wa: (b, g, d, u) => `${b} & ${g} invite you to their wedding on ${d} at Eclaire, Salé.\n\nOpen the invitation:\n${u}` },
+    es: { loc: 'es-ES', h: false, invite: 'os invitan a su boda', tap: 'Toca el sello para abrir', open: 'Abrir la invitación',
+      dear: '¡Queridos familiares y amigos!', welcome: 'Queremos compartir con vosotros la alegría del día más bonito de nuestra vida.', party: 'La celebración tendrá lugar el',
+      at: 'Recepción de los invitados a las ', hall: 'en el salón', city: 'Salé · Marruecos', map: 'Ver en el mapa', prog: 'El programa', dress: 'Dress code',
+      dressTxt: 'Nos encantaría que siguierais los colores de nuestra velada', before: 'para la boda faltan', cal: 'Añadir al calendario',
+      units: ['días', 'horas', 'min', 'seg'], today: 'Es hoy', thanks: 'Gracias por acompañarnos', love: 'Con cariño',
+      prev: 'Foto anterior', next: 'Foto siguiente', title: 'Boda de', bad: 'Este enlace de invitación está incompleto. Pide a los novios que te lo envíen de nuevo.',
+      prog0: ['Llegada de los invitados', 'Entrada de los novios', 'Cena', 'La tarta', 'Baile'],
+      wa: (b, g, d, u) => `${b} y ${g} os invitan a su boda el ${d} en el salón Eclaire, Salé.\n\nAbrir la invitación:\n${u}` },
+  };
+  let L = T.fr;
+  const useLang = (l) => { L = T[l] || T.fr; document.documentElement.lang = T[l] ? l : 'fr'; };
+  const hm = (t) => (L.h ? t.replace(':', 'h') : t);
+  const progLabel = (l) => { const i = T.fr.prog0.indexOf(l); return i >= 0 ? L.prog0[i] : l; };
+  const longDate = (d) => fmt(d, L.loc, { day: 'numeric', month: 'long', year: 'numeric' });
+  const fullDate = (d) => fmt(d, L.loc, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
 
   // ---------- builders ----------
   function el(tag, cls, text) { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
@@ -436,10 +476,10 @@ img{max-width:100%;display:block}
     top.append(mono(b, g));
     if (x.d) top.append(el('p', 'date', longDate(x.d)));
     const nm = el('h1', 'names'); nm.append(el('span', '', b), el('i', '', '&'), el('span', '', g)); top.append(nm);
-    const btn = el('button', 'seal-btn'); btn.type = 'button'; btn.setAttribute('aria-label', 'Ouvrir l\u2019invitation'); btn.innerHTML = sealSVG(initial(b), initial(g));
+    const btn = el('button', 'seal-btn'); btn.type = 'button'; btn.setAttribute('aria-label', L.open); btn.innerHTML = sealSVG(initial(b), initial(g));
     const bot = el('div', 'cv-bot');
-    bot.append(el('p', 'caps', 'vous invitent à leur mariage'));
-    const tap = el('p', 'tap'); tap.append('Touchez le sceau pour ouvrir'); bot.append(tap, sprig());
+    bot.append(el('p', 'caps', L.invite));
+    const tap = el('p', 'tap'); tap.append(L.tap); bot.append(tap, sprig());
     const wrap = el('div', 'cv-wrap'); wrap.append(top, btn); cv.append(wrap, bot);
     const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
     const open = () => {
@@ -457,7 +497,7 @@ img{max-width:100%;display:block}
     const g = el('div', 'gal'), tr = el('div', 'track'), dots = el('div', 'dots');
     list.forEach(([src, alt], i) => { tr.append(img(src, alt)); dots.append(el('i', i ? '' : 'on')); });
     const go = (d) => tr.scrollBy({ left: d * tr.clientWidth, behavior: 'smooth' });
-    const l = el('button', 'nav l', '‹'), r = el('button', 'nav r', '›'); l.type = r.type = 'button'; l.setAttribute('aria-label', 'Photo précédente'); r.setAttribute('aria-label', 'Photo suivante');
+    const l = el('button', 'nav l', '‹'), r = el('button', 'nav r', '›'); l.type = r.type = 'button'; l.setAttribute('aria-label', L.prev); r.setAttribute('aria-label', L.next);
     l.onclick = () => go(-1); r.onclick = () => go(1);
     tr.addEventListener('scroll', () => { const k = Math.round(tr.scrollLeft / Math.max(1, tr.clientWidth)); [...dots.children].forEach((d, i) => d.classList.toggle('on', i === k)); }, { passive: true });
     g.append(tr, l, r, dots); return g;
@@ -470,38 +510,38 @@ img{max-width:100%;display:block}
 
     // 2. welcome, date, place
     let s = sec();
-    s.append(el('h2', 'scrh', 'Chers parents et amis !'));
+    s.append(el('h2', 'scrh', L.dear));
     if (x.ff) s.append(el('p', 'caps soft', x.ff));
-    s.append(el('p', 'p', x.n || 'Nous voulons partager avec vous la joie du plus beau jour de notre vie.'));
+    s.append(el('p', 'p', x.n || L.welcome));
     if (x.d) {
-      s.append(el('p', 'p', 'La fête aura lieu le'));
-      s.append(el('p', 'scrd', fmt(x.d, 'fr-FR', { weekday: 'long', day: 'numeric', month: 'long' }) + ' ' + x.d.slice(0, 4)));
-      const ac = el('p', 'caps', 'Accueil des invités à '); ac.append(el('span', 'tm', x.h.replace(':', 'h'))); s.append(ac);
+      s.append(el('p', 'p', L.party));
+      s.append(el('p', 'scrd', fullDate(x.d)));
+      const ac = el('p', 'caps', L.at); ac.append(el('span', 'tm', hm(x.h))); s.append(ac);
     }
-    s.append(el('hr', 'rule'), el('p', 'caps', 'à la salle'), el('div', 'wm'), el('p', 'caps soft', 'Salé · Maroc'));
+    s.append(el('hr', 'rule'), el('p', 'caps', L.hall), el('div', 'wm'), el('p', 'caps soft', L.city));
     inv.append(gallery([['img/salle.webp', 'La salle Eclaire'], ['img/scene.webp', 'La scène'], ['img/diner.webp', 'Le dîner'], ['img/table.webp', 'Une table dressée']]));
     s = sec(); s.style.paddingTop = '20px';
-    const ma = el('a', 'btnline', 'Voir sur la carte'); ma.href = mapUrl(x); ma.target = '_blank'; ma.rel = 'noopener'; s.append(ma);
+    const ma = el('a', 'btnline', L.map); ma.href = mapUrl(x); ma.target = '_blank'; ma.rel = 'noopener'; s.append(ma);
 
     // 3. programme
     if (x.p.length) {
-      s = sec(); s.id = 'prog'; s.append(sprig(), el('h2', 'scrh', 'Le programme'));
+      s = sec(); s.id = 'prog'; s.append(sprig(), el('h2', 'scrh', L.prog));
       const ol = el('ol', 'prog');
-      x.p.forEach(([t, l]) => { const li = el('li'); li.append(el('span', 't', t ? t.replace(':', 'h') : ''), el('span', 'l', l)); ol.append(li); });
+      x.p.forEach(([t, l]) => { const li = el('li'); li.append(el('span', 't', t ? hm(t) : ''), el('span', 'l', progLabel(l))); ol.append(li); });
       s.append(ol);
     }
     // 4. dress code
     if (x.c.length) {
-      s = sec(); s.append(el('hr', 'rule'), el('h2', 'scrh', 'Dress code'));
-      s.append(el('p', 'caps', x.ct || 'Nous serions ravis que vous suiviez les couleurs de notre soirée'));
+      s = sec(); s.append(el('hr', 'rule'), el('h2', 'scrh', L.dress));
+      s.append(el('p', 'caps', x.ct || L.dressTxt));
       const sw = el('div', 'swatches'); x.c.forEach((c) => { const i = el('i'); i.style.setProperty('--c', c); sw.append(i); }); s.append(sw, sprig());
     }
     // 5. countdown
     if (x.d) {
       const cd = el('section', 'cd'); cd.append(img('img/arch.webp', ''));
-      cd.append(el('p', 'big', longDate(x.d)), el('p', 'sm', 'avant le mariage, il reste'));
+      cd.append(el('p', 'big', longDate(x.d)), el('p', 'sm', L.before));
       const ct = el('div', 'count'); ct.dataset.at = zonedEpoch(x.d, x.h); cd.append(ct); tick(ct);
-      const cal = el('a', '', 'Ajouter au calendrier'); cal.href = icsUrl(x); cal.download = 'mariage-' + slug(b) + '-' + slug(g) + '.ics'; cd.append(cal);
+      const cal = el('a', '', L.cal); cal.href = icsUrl(x); cal.download = 'mariage-' + slug(b) + '-' + slug(g) + '.ics'; cd.append(cal);
       inv.append(cd);
     }
     // 6. RSVP
@@ -511,7 +551,7 @@ img{max-width:100%;display:block}
       s.append(rsvpForm(x));
     }
     // 7. closing
-    s = sec(); s.append(el('hr', 'rule'), el('p', 'caps soft', 'Avec amour'), el('h2', 'scrh', b + ' & ' + g));
+    s = sec(); s.append(el('hr', 'rule'), el('p', 'caps soft', L.love), el('h2', 'scrh', b + ' & ' + g));
     s.append(sprig());
     const ft = el('footer', 'foot'); ft.append(el('span', 'sym'), el('span', '', 'Eclaire Weddings & Events')); inv.append(ft);
     return inv;
@@ -519,8 +559,8 @@ img{max-width:100%;display:block}
 
   function tick(ct) {
     const left = Number(ct.dataset.at) - Date.now();
-    if (left <= 0) { ct.replaceChildren(el('div', 'done', left > -12 * 3600e3 ? 'C’est aujourd’hui' : 'Merci d’avoir été là')); return; }
-    const parts = [[Math.floor(left / 864e5), 'jours'], [Math.floor(left / 36e5) % 24, 'heures'], [Math.floor(left / 6e4) % 60, 'min'], [Math.floor(left / 1e3) % 60, 'sec']];
+    if (left <= 0) { ct.replaceChildren(el('div', 'done', left > -12 * 3600e3 ? L.today : L.thanks)); return; }
+    const parts = [[Math.floor(left / 864e5), L.units[0]], [Math.floor(left / 36e5) % 24, L.units[1]], [Math.floor(left / 6e4) % 60, L.units[2]], [Math.floor(left / 1e3) % 60, L.units[3]]];
     if (ct.children.length !== 4 || ct.querySelector('.done')) ct.replaceChildren(...parts.map((p) => { const d = el('div'); d.append(el('b'), el('span', '', p[1])); return d; }));
     ct.querySelectorAll('b').forEach((b, i) => { b.textContent = i === 0 ? parts[0][0] : pad(parts[i][0]); });
   }
@@ -531,7 +571,7 @@ img{max-width:100%;display:block}
     const s = zonedEpoch(x.d, x.h), e = s + 6 * 3600e3;
     const z = (t) => new Date(t).toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
     const es = (v) => v.replace(/[\\,;]/g, (c) => '\\' + c).replace(/\n/g, '\\n');
-    const title = 'Mariage de ' + b + ' & ' + g;
+    const title = L.title + ' ' + b + ' & ' + g;
     const ics = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Eclaire//Invitation//FR', 'BEGIN:VEVENT',
       'UID:' + z(s) + '-' + slug(title) + '@eclaire', 'DTSTAMP:' + z(Date.now()), 'DTSTART:' + z(s), 'DTEND:' + z(e),
       'SUMMARY:' + es(title), 'LOCATION:' + es('Eclaire Weddings & Events, Salé'), 'DESCRIPTION:' + es(mapUrl(x)),
@@ -578,10 +618,11 @@ img{max-width:100%;display:block}
     try { x = clean(await decode(code)); } catch (e) {}
     $('#guest').hidden = false;
     if (!x || !x.bf || !x.gf) {
-      const inv = el('article', 'inv'); const s = el('section', 'sec'); s.append(el('p', 'p', 'Ce lien d’invitation est incomplet. Demandez aux mariés de vous le renvoyer.')); inv.append(s); $('#gcol').append(inv); return;
+      const inv = el('article', 'inv'); const s = el('section', 'sec'); s.append(el('p', 'p', L.bad)); inv.append(s); $('#gcol').append(inv); return;
     }
+    useLang(x.l);
     const { b, g } = names(x);
-    document.title = 'Mariage de ' + b + ' & ' + g;
+    document.title = L.title + ' ' + b + ' & ' + g;
     const inv = renderInvitation(x);
     $('#gcol').append(inv);
     const q = new URLSearchParams(location.search);
@@ -609,7 +650,8 @@ img{max-width:100%;display:block}
     const c = [...document.querySelectorAll('#cols input[type=color]')].map((i) => i.value);
     return clean({ bf: v('bf'), gf: v('gf'), ff: v('ff'), o: v('op'), n: v('nt'), d: v('dt'), h: v('tm'), p, c, ct: v('dct') });
   }
-  let pvTimer = 0, pvCode = '';
+  let pvTimer = 0, pvCode = '', pvL = 'fr', shL = 'fr', lastX = null;
+  const pressLang = (box, l) => box.querySelectorAll('button').forEach((b) => b.setAttribute('aria-pressed', b.dataset.l === l));
   const VIEWS = { env: '?preview=1' };
   function loadPhones() { document.querySelectorAll('#phones .phone').forEach((ph) => { ph.querySelector('iframe').src = location.pathname + VIEWS[ph.dataset.v] + '#i=' + pvCode; }); }
   function preview() {
@@ -619,7 +661,7 @@ img{max-width:100%;display:block}
     clearTimeout(pvTimer);
     pvTimer = setTimeout(async () => {
       const y = Object.assign({}, x, { bf: x.bf || 'Salma', gf: x.gf || 'Youssef', d: x.d || defaultDate() });
-      pvCode = await encode(y); loadPhones();
+      y.l = pvL; pvCode = await encode(y); loadPhones();
     }, 450);
   }
   const defaultDate = () => new Date(Date.now() + 90 * 864e5).toISOString().slice(0, 10);
@@ -644,17 +686,28 @@ img{max-width:100%;display:block}
     const miss = [!x.bf && 'le prénom de la mariée', !x.gf && 'le prénom du marié', !x.d && 'la date'].filter(Boolean);
     if (miss.length) { err.textContent = 'Il manque ' + miss.join(', ') + '.'; err.hidden = false; return; }
     err.hidden = true;
+    lastX = x;
+    await shareIn(shL);
+    $('#share').hidden = false;
+    $('#share').scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
+  const LNAME = { fr: 'en français', en: 'en anglais', es: 'en espagnol' };
+  async function shareIn(l) {
+    if (!lastX) return;
+    shL = l; pressLang($('#shLang'), l);
+    const x = Object.assign({}, lastX, { l });
     const url = location.origin + location.pathname + '#i=' + (await encode(x));
     $('#out').value = url; $('#openG').href = url;
-    const text = `${x.bf} & ${x.gf} vous invitent à leur mariage, le ${fmt(x.d, 'fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })} à la salle Eclaire, Salé.\n\nOuvrir l'invitation :\n${url}`;
-    $('#sendWa').href = 'https://wa.me/?text=' + encodeURIComponent(text);
+    $('#shTip').textContent = 'Lien ' + LNAME[l] + ' : envoyez-le aux invités qui parlent cette langue.';
+    const t = T[l], when = fmt(x.d, t.loc, { weekday: 'long', day: 'numeric', month: 'long' });
+    $('#sendWa').href = 'https://wa.me/?text=' + encodeURIComponent(t.wa(x.bf, x.gf, when, url));
+    $('#dlQr').download = 'invitation-qr-' + l + '.png';
     try {
       const q = qrcode(0, 'L'); q.addData(url); q.make();
       $('#qr').innerHTML = q.createSvgTag({ cellSize: 4, margin: 0, scalable: true });
       $('#dlQr').href = q.createDataURL(8, 4); $('#dlQr').hidden = false;
     } catch (e2) { $('#qr').textContent = 'Invitation trop longue pour un QR code : raccourcissez les textes.'; $('#dlQr').hidden = true; }
-    $('#share').hidden = false;
-    $('#share').scrollIntoView({ behavior: 'smooth', block: 'center' });
   }
 
   async function boot() {
@@ -671,6 +724,8 @@ img{max-width:100%;display:block}
     $('#delCol').addEventListener('click', () => { const l = $('#cols').lastElementChild; if (l) { l.remove(); preview(); } });
     $('#replay').addEventListener('click', () => { const f = document.querySelector('.phone[data-v=env] iframe'); try { f.contentWindow.location.reload(); } catch (e) { loadPhones(); } });
     $('#form').addEventListener('submit', create);
+    $('#pvLang').addEventListener('click', (e) => { const b = e.target.closest('[data-l]'); if (!b) return; pvL = b.dataset.l; pressLang($('#pvLang'), pvL); preview(); });
+    $('#shLang').addEventListener('click', (e) => { const b = e.target.closest('[data-l]'); if (b) shareIn(b.dataset.l); });
     $('#copy').addEventListener('click', async () => {
       const i = $('#out');
       try { await navigator.clipboard.writeText(i.value); $('#copy').textContent = 'Copié'; } catch (e) { i.select(); $('#copy').textContent = 'Sélectionné'; }
