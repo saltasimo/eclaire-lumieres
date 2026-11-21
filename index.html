@@ -4,7 +4,9 @@
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Playfair+Display:wght@800;900&family=Montserrat:wght@400;500;600&display=swap">
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Playfair+Display:wght@800;900&family=Montserrat:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Playfair+Display:wght@800;900&family=Montserrat:wght@400;500;600&display=swap" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Playfair+Display:wght@800;900&family=Montserrat:wght@400;500;600&display=swap"></noscript>
 <style>
 /* Layout: one screen. A rounded card floats over a blurred, greyed copy of the same film. Inside the card the film fills everything; white text on the left (script line, huge title, spaced subtitle, short text, two pills), a glass strip on the right with the five stops as round thumbnails, numbers and arrows, social icons at the bottom. Scrolling plays the film and swaps the text; it always comes to rest on one of the five stops. Single dark look by choice. */
 :root{
@@ -220,11 +222,11 @@ button{font:inherit;color:inherit}
     <button class="menu" type="button" id="open-menu" aria-label="Menu"><svg class="ic" aria-hidden="true"><use href="#i-menu"/></svg></button>
     <div class="nav">
       <ul class="thumbs" id="thumbs">
-        <li><button type="button" data-k="0" aria-label="Étape 1, l'entrée"><img src="frames/f000.webp" alt=""></button></li>
-        <li><button type="button" data-k="1" aria-label="Étape 2, la table"><img src="frames/f060.webp" alt=""></button></li>
-        <li><button type="button" data-k="2" aria-label="Étape 3, le dîner"><img src="frames/f110.webp" alt=""></button></li>
-        <li><button type="button" data-k="3" aria-label="Étape 4, la salle"><img src="frames/f146.webp" alt=""></button></li>
-        <li><button type="button" data-k="4" aria-label="Étape 5, la scène"><img src="frames/f190.webp" alt=""></button></li>
+        <li><button type="button" data-k="0" aria-label="Étape 1, l'entrée"><img src="frames/t/f000.webp" alt="" width="58" height="58" decoding="async"></button></li>
+        <li><button type="button" data-k="1" aria-label="Étape 2, la table"><img src="frames/t/f060.webp" alt="" width="58" height="58" decoding="async"></button></li>
+        <li><button type="button" data-k="2" aria-label="Étape 3, le dîner"><img src="frames/t/f110.webp" alt="" width="58" height="58" decoding="async"></button></li>
+        <li><button type="button" data-k="3" aria-label="Étape 4, la salle"><img src="frames/t/f146.webp" alt="" width="58" height="58" decoding="async"></button></li>
+        <li><button type="button" data-k="4" aria-label="Étape 5, la scène"><img src="frames/t/f190.webp" alt="" width="58" height="58" decoding="async"></button></li>
       </ul>
       <div class="nums">
         <button class="arrow" type="button" id="prev" aria-label="Étape précédente"><svg class="ic" aria-hidden="true"><use href="#i-up"/></svg></button>
@@ -312,9 +314,11 @@ button{font:inherit;color:inherit}
   const mnums = [...document.querySelectorAll('#mnums span')].filter((_, i) => i % 2 === 0);
 
   /* frames: 8 per second, plus 24 per second through the fast dive (5.4 to 6.9 s) */
+  /* portrait screens get a lighter, centre-cropped set */
+  const DIR = innerWidth < innerHeight * 0.9 ? 'frames/m/' : 'frames/';
   const LIST = [];
-  for (let i = 0; i < N; i++) LIST.push({ t: i / FPS, b: i, s: 'frames/f' + String(i).padStart(3, '0') + '.webp' });
-  for (let n = 129; n <= 165; n++) if (n % 3) LIST.push({ t: n / 24, b: -1, s: 'frames/g' + String(n).padStart(3, '0') + '.webp' });
+  for (let i = 0; i < N; i++) LIST.push({ t: i / FPS, b: i, s: DIR + 'f' + String(i).padStart(3, '0') + '.webp' });
+  for (let n = 129; n <= 165; n++) if (n % 3) LIST.push({ t: n / 24, b: -1, s: DIR + 'g' + String(n).padStart(3, '0') + '.webp' });
   LIST.sort((a, b) => a.t - b.t);
   const M = LIST.length, TT = LIST.map(f => f.t), BK = new Int32Array(N);
   LIST.forEach((f, k) => { if (f.b >= 0) BK[f.b] = k; });
@@ -322,11 +326,17 @@ button{font:inherit;color:inherit}
   const order = [], seen = new Set();
   const add = k => { if (k >= 0 && k < M && !seen.has(k)) { seen.add(k); order.push(k); } };
   [0, 60, 110, 146, 190, 239].forEach(i => add(BK[i]));
-  [32, 16, 8, 4, 2, 1].forEach(st => { for (let i = 0; i < N; i += st) add(BK[i]); });
+  [32, 16].forEach(st => { for (let i = 0; i < N; i += st) add(BK[i]); });
+  const FIRST = order.length;
+  [8, 4, 2, 1].forEach(st => { for (let i = 0; i < N; i += st) add(BK[i]); });
   for (let k = 0; k < M; k++) add(k);
-  let next = 0, active = 0;
+  /* the stops load at once; the rest waits for the first gesture or a quiet moment */
+  let next = 0, active = 0, gate = FIRST;
+  const open = () => { if (gate < order.length) { gate = order.length; pump(); } };
+  ['scroll', 'wheel', 'touchstart', 'pointerdown', 'keydown'].forEach(e => addEventListener(e, open, { once: true, passive: true }));
+  addEventListener('load', () => setTimeout(open, 2500));
   function pump() {
-    while (active < 6 && next < order.length) {
+    while (active < 6 && next < gate) {
       const k = order[next++]; active++;
       const im = new Image(); im.decoding = 'async';
       const done = good => { if (good) { imgs[k] = im; ok[k] = 1; } active--; dirty = true; tick(); pump(); };
