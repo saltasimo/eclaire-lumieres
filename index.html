@@ -100,7 +100,7 @@ button{font:inherit;color:inherit}
 .nums ol{list-style:none;margin:2px 0;padding:0;display:flex;flex-direction:column;gap:2px;font-size:12px;font-weight:500;color:var(--white-3);font-variant-numeric:tabular-nums}
 .nums li{padding:2px 4px;border-bottom:1px solid rgba(255,255,255,.12);transition:color .3s}
 .nums li[aria-current="step"]{color:var(--white);font-weight:600;border-bottom-color:var(--white)}
-.tour{display:flex;align-items:center;gap:10px;padding:0 14px;margin-left:-96px;width:calc(100% + 96px)}
+.tour{margin-top:auto;display:flex;align-items:center;gap:10px;padding:0 14px;margin-left:-96px;width:calc(100% + 96px)}
 .tour .round{flex:none;display:grid;place-items:center;width:48px;height:48px;border-radius:50%;background:rgba(255,255,255,.18);box-shadow:inset 0 0 0 1px var(--glass-line)}
 .tour .round .ic{width:14px;height:14px;fill:currentColor;stroke:none}
 .tour p{margin:0;font-size:10px;line-height:1.45;color:var(--white-2)}
@@ -220,28 +220,12 @@ button{font:inherit;color:inherit}
 
   <aside class="strip" aria-label="Les étapes de la visite">
     <button class="menu" type="button" id="open-menu" aria-label="Menu"><svg class="ic" aria-hidden="true"><use href="#i-menu"/></svg></button>
-    <div class="nav">
-      <ul class="thumbs" id="thumbs">
-        <li><button type="button" data-k="0" aria-label="Étape 1, l'entrée"><img src="frames/t/f000.webp" alt="" width="58" height="58" decoding="async"></button></li>
-        <li><button type="button" data-k="1" aria-label="Étape 2, la table"><img src="frames/t/f060.webp" alt="" width="58" height="58" decoding="async"></button></li>
-        <li><button type="button" data-k="2" aria-label="Étape 3, le dîner"><img src="frames/t/f110.webp" alt="" width="58" height="58" decoding="async"></button></li>
-        <li><button type="button" data-k="3" aria-label="Étape 4, la salle"><img src="frames/t/f146.webp" alt="" width="58" height="58" decoding="async"></button></li>
-        <li><button type="button" data-k="4" aria-label="Étape 5, la scène"><img src="frames/t/f190.webp" alt="" width="58" height="58" decoding="async"></button></li>
-      </ul>
-      <div class="nums">
-        <button class="arrow" type="button" id="prev" aria-label="Étape précédente"><svg class="ic" aria-hidden="true"><use href="#i-up"/></svg></button>
-        <ol id="nums" aria-hidden="true"><li>01</li><li>02</li><li>03</li><li>04</li><li>05</li></ol>
-        <button class="arrow" type="button" id="next" aria-label="Étape suivante"><svg class="ic" aria-hidden="true"><use href="#i-down"/></svg></button>
-      </div>
-    </div>
     <div class="tour" aria-hidden="true">
       <span class="round"><svg class="ic"><use href="#i-play"/></svg></span>
       <p><b>Visite filmée</b>Faites défiler pour avancer dans la salle</p>
     </div>
   </aside>
-  <span class="connector" id="connector" aria-hidden="true"></span>
 
-  <div class="mnums" id="mnums" aria-hidden="true"><span>01</span><span>·</span><span>02</span><span>·</span><span>03</span><span>·</span><span>04</span><span>·</span><span>05</span></div>
 
   <footer class="social">
     <span>Réseaux sociaux</span>
@@ -462,13 +446,12 @@ button{font:inherit;color:inherit}
     thumbs.forEach((b, i) => i === k ? b.setAttribute('aria-current', 'step') : b.removeAttribute('aria-current'));
     nums.forEach((n, i) => i === k ? n.setAttribute('aria-current', 'step') : n.removeAttribute('aria-current'));
     mnums.forEach((n, i) => i === k ? n.setAttribute('aria-current', 'step') : n.removeAttribute('aria-current'));
-    $('prev').disabled = k === 0; $('next').disabled = k === STOPS.length - 1 && scrollY >= maxY() - 2;
     placeConnector();
   }
   function placeConnector() {
-    const b = thumbs[Math.max(0, scene)]; if (!b) return;
+    const b = thumbs[Math.max(0, scene)], cn = $('connector'); if (!b || !cn) return;
     const r = b.getBoundingClientRect(), c = card.getBoundingClientRect();
-    $('connector').style.top = (r.top + r.height / 2 - c.top) + 'px';
+    cn.style.top = (r.top + r.height / 2 - c.top) + 'px';
   }
 
   function frame() {
@@ -530,8 +513,6 @@ button{font:inherit;color:inherit}
   });
   addEventListener('resize', () => { layout(); readScroll(); tick(); });
   thumbs.forEach(b => b.addEventListener('click', () => goStop(+b.dataset.k)));
-  $('prev').addEventListener('click', () => goStop(scene - 1));
-  $('next').addEventListener('click', () => goStop(scene + 1));
   $('home').addEventListener('click', e => { e.preventDefault(); goStop(0); });
 
   /* booking drawer */
