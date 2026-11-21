@@ -84,6 +84,7 @@ img{max-width:100%;display:block}
 .btnfill{display:inline-flex;align-items:center;justify-content:center;min-height:46px;padding:0 34px;border:0;background:var(--accent);color:var(--onAccent);font-family:var(--f-serif);font-size:14px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;border-radius:2px}
 
 .inv.in .sec:first-of-type > *{animation:rise 1s cubic-bezier(.2,.7,.2,1) both}
+.inv.live .sec:first-of-type > *,.inv.live .letter > *{animation:none!important}
 @keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
 .names{margin:6px 0 0;font-family:var(--f-script);font-weight:400;line-height:.98;display:grid;justify-items:center}
 .names i{font-style:normal;font-size:.45em;line-height:1.15}
@@ -143,19 +144,19 @@ img{max-width:100%;display:block}
 /* ================= MAKER ================= */
 /* product-page layout: a two-tone hero with the name on the left and three phones on the right, the form below */
 #maker{min-height:100vh;background-color:#f4eee6;background-image:var(--grain)}
-.hero{position:relative;display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.25fr);align-items:center;min-height:min(760px,100vh);
-  background:linear-gradient(90deg,#efe5dc 0,#efe5dc 46%,#e6d6ca 46%,#e6d6ca 100%);overflow:hidden;
-  padding:calc(30px + env(safe-area-inset-top,0px)) max(24px,env(safe-area-inset-right,0px)) 40px max(24px,env(safe-area-inset-left,0px))}
+.hero{position:relative;display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);align-items:start;
+  background:linear-gradient(90deg,#efe5dc 0,#efe5dc 57.5%,#e6d6ca 57.5%,#e6d6ca 100%);overflow:clip}
 .hero::after{content:"";position:absolute;inset:0;background-image:var(--grain);pointer-events:none}
-.hl{position:relative;z-index:1;display:grid;align-content:space-between;min-height:min(640px,82vh);padding:10px 4vw 10px 5vw}
+.lcol{position:relative;z-index:1;min-width:0}
+.hl{position:relative;z-index:1;display:grid;gap:26px;padding:calc(34px + env(safe-area-inset-top,0px)) 4vw 10px 5vw}
 .back{justify-self:start;color:var(--m-ink);font-size:13px;letter-spacing:.22em;text-transform:uppercase;text-decoration:none;opacity:.7}
 .back:hover{opacity:1}
 .brand{margin:0;font-size:12px;letter-spacing:.32em;text-transform:uppercase;color:var(--m-ink)}
-.hl .brand{margin-top:40px}
+.hl .brand{margin-top:24px}
 .hl h1{margin:0;font-family:var(--f-serif);font-weight:400;font-size:clamp(60px,7.4vw,118px);line-height:.95;letter-spacing:-.015em;color:#24201c}
 .feat{list-style:none;margin:0;padding:0;display:grid;gap:6px;font-size:17px;color:var(--m-ink)}
 .feat i{font-style:italic}
-.hr{position:relative;z-index:1;display:grid;justify-items:center;gap:18px}
+.hr{position:sticky;top:0;z-index:1;height:100vh;height:100svh;display:grid;justify-items:center;align-content:center;gap:16px;padding:16px}
 .phones{--k:.6;display:flex;justify-content:center}
 .phone{margin:0;display:grid;gap:12px;justify-items:center}
 .phone .screen{position:relative;width:calc(393px * var(--k));height:calc(852px * var(--k));border-radius:calc(54px * var(--k));overflow:hidden;background:var(--linen);
@@ -169,11 +170,11 @@ img{max-width:100%;display:block}
 .langs button[aria-pressed="true"]{background:#2b2622;color:#f7f3ec}
 .share .langs{justify-self:center}
 .replay{border:1px solid rgba(59,52,44,.35);background:rgba(255,255,255,.4);padding:9px 18px;font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--m-ink)}
-.wrap{max-width:1060px;margin:0 auto;padding:60px max(16px,env(safe-area-inset-left,0px)) 80px}
-.fhead{display:grid;justify-items:center;text-align:center;gap:6px;margin-bottom:34px}
+.wrap{padding:44px 4vw 90px 5vw}
+.fhead{display:grid;gap:6px;margin-bottom:30px;max-width:640px}
 .fhead h2{margin:0;font-family:var(--f-serif);font-weight:400;font-size:clamp(40px,5vw,60px);line-height:1;letter-spacing:-.01em}
 .fhead p:last-child{margin:0;color:var(--m-soft);font-style:italic;font-size:18px}
-.form{display:grid;grid-template-columns:minmax(0,1fr);gap:22px;max-width:640px;margin:0 auto}
+.form{display:grid;grid-template-columns:minmax(0,1fr);gap:22px;max-width:640px}
 
 .form > .go{justify-self:stretch}
 .blk{position:relative;background-color:var(--m-paper);background-image:var(--grain);padding:30px 28px 28px;display:grid;gap:18px;min-width:0;box-shadow:0 12px 30px rgba(70,50,30,.1)}
@@ -213,8 +214,10 @@ img{max-width:100%;display:block}
 .qrbox .qr svg{width:100%;height:auto;display:block}
 .qrbox .acts2{display:grid;gap:10px}
 .tip{margin:0;font-size:15px;color:var(--m-soft);font-style:italic;text-align:center}
-@media (max-width:980px){.hero{grid-template-columns:minmax(0,1fr);background:linear-gradient(180deg,#efe5dc 0,#efe5dc 42%,#e6d6ca 42%,#e6d6ca 100%)}.hl{min-height:0;gap:22px;padding:0 4px 26px}.hl .brand{margin-top:10px}
-  .phones{width:100%;padding-top:14px}.form{grid-template-columns:minmax(0,1fr)}}
+@media (max-width:980px){.hero{grid-template-columns:minmax(0,1fr);background:#efe5dc}
+  .lcol{display:contents}.hl{order:1;gap:18px;padding:calc(24px + env(safe-area-inset-top,0px)) 20px 20px}.hl .brand{margin-top:6px}
+  .hr{order:2;position:relative;height:auto;padding:26px 16px 30px;background:#e6d6ca}.wrap{order:3;padding:40px 16px 70px}
+  .phones{width:100%}}
 @media (max-width:560px){.blk{padding:26px 18px 22px}.prow{grid-template-columns:96px minmax(0,1fr) 34px}}
 @media (max-width:420px){.qrbox{grid-template-columns:minmax(0,1fr)}.qrbox .qr{max-width:200px;margin:0 auto}}
 @media (prefers-reduced-motion:reduce){.seal-btn::after,.letter .down b{animation:none}.inv.in .letter > *{animation:none}}
@@ -241,6 +244,7 @@ img{max-width:100%;display:block}
 <!-- ================= MARIÉE : créer l'invitation ================= -->
 <main id="maker" hidden>
  <section class="hero">
+ <div class="lcol">
   <div class="hl">
     <a class="back" href="../">← Eclaire</a>
     <p class="brand">Eclaire · Weddings &amp; Events</p>
@@ -251,14 +255,6 @@ img{max-width:100%;display:block}
       <li>Prête en <i>quelques minutes</i>, depuis votre téléphone</li>
     </ul>
   </div>
-  <div class="hr" id="hr">
-    <div class="langs" id="pvLang" role="group" aria-label="Langue de l'aperçu"><button type="button" data-l="fr" aria-pressed="true">Français</button><button type="button" data-l="en" aria-pressed="false">English</button><button type="button" data-l="es" aria-pressed="false">Español</button></div>
-    <div class="phones" id="phones">
-        <figure class="phone" data-v="env"><div class="screen"><iframe title="Aperçu : l'enveloppe"></iframe></div><span class="island" aria-hidden="true"></span><figcaption>Aperçu · touchez le sceau</figcaption></figure>
-    </div>
-    <button class="replay" type="button" id="replay">Rejouer l'ouverture</button>
-  </div>
- </section>
  <div class="wrap">
   <header class="fhead"><p class="brand">Personnaliser</p><h2>Vos informations</h2><p>Chaque changement apparaît aussitôt sur le téléphone.</p></header>
     <form class="form" id="form" novalidate>
@@ -319,6 +315,15 @@ img{max-width:100%;display:block}
       </section>
     </form>
  </div>
+ </div>
+  <div class="hr" id="hr">
+    <div class="langs" id="pvLang" role="group" aria-label="Langue de l'aperçu"><button type="button" data-l="fr" aria-pressed="true">Français</button><button type="button" data-l="en" aria-pressed="false">English</button><button type="button" data-l="es" aria-pressed="false">Español</button></div>
+    <div class="phones" id="phones">
+        <figure class="phone" data-v="env"><div class="screen"><iframe title="Aperçu : l'enveloppe"></iframe></div><span class="island" aria-hidden="true"></span><figcaption>Aperçu · touchez le sceau</figcaption></figure>
+    </div>
+    <button class="replay" type="button" id="replay">Rejouer l'ouverture</button>
+  </div>
+ </section>
 </main>
 
 <!-- ================= INVITÉ ================= -->
@@ -532,7 +537,7 @@ img{max-width:100%;display:block}
     }
     // 4. dress code
     if (x.c.length) {
-      s = sec(); s.append(el('hr', 'rule'), el('h2', 'scrh', L.dress));
+      s = sec(); s.id = 'dress'; s.append(el('hr', 'rule'), el('h2', 'scrh', L.dress));
       s.append(el('p', 'caps', x.ct || L.dressTxt));
       const sw = el('div', 'swatches'); x.c.forEach((c) => { const i = el('i'); i.style.setProperty('--c', c); sw.append(i); }); s.append(sw, sprig());
     }
@@ -633,6 +638,38 @@ img{max-width:100%;display:block}
     }
     document.body.append(cover(x, inv));
     if (document.fonts) document.fonts.ready.then(() => { const s = document.querySelector('.seal-btn'); if (s) { const h = s.innerHTML; s.innerHTML = h; } });
+    if (/[?&]preview=1/.test(location.search)) livePreview(x);
+  }
+
+  /* inside the maker's phone: redraw in place as the bride types, keep the scroll, and show the part she is editing */
+  function livePreview(cur) {
+    document.documentElement.style.overscrollBehavior = 'contain';
+    document.body.style.overscrollBehavior = 'contain';
+    const jump = (to) => {
+      const cv = document.querySelector('.cv'), inv = document.querySelector('#gcol .inv');
+      if (!inv) return;
+      if (to === 'cover') { if (!cv) { inv.classList.remove('in', 'live'); document.documentElement.style.scrollBehavior = 'auto'; scrollTo(0, 0); document.documentElement.style.scrollBehavior = ''; document.body.append(cover(cur, inv)); } return; }
+      if (cv) { cv.remove(); document.documentElement.style.overflow = ''; inv.classList.add('in'); }
+      const t = to === 'top' ? inv.querySelector('.sec') : inv.querySelector('#' + to);
+      if (t) scrollTo({ top: Math.max(0, t.getBoundingClientRect().top + scrollY - 20), behavior: 'smooth' });
+    };
+    addEventListener('message', async (e) => {
+      if (e.source !== parent || !e.data || e.data.k !== 'eclaire-pv') return;
+      if (e.data.code) {
+        let x = null; try { x = clean(await decode(e.data.code)); } catch (err) { return; }
+        if (!x || !x.bf || !x.gf) return;
+        cur = x;
+        useLang(x.l);
+        const old = document.querySelector('#gcol .inv'), y = scrollY, cv = document.querySelector('.cv');
+        const inv = renderInvitation(x);
+        if (!cv) inv.classList.add('in', 'live');
+        old.replaceWith(inv);
+        if (cv) { const nc = cover(x, inv); cv.replaceWith(nc); }
+        else { document.documentElement.style.scrollBehavior = 'auto'; scrollTo(0, y); document.documentElement.style.scrollBehavior = ''; }
+      }
+      if (e.data.to) jump(e.data.to);
+    });
+    parent.postMessage({ k: 'eclaire-pv-ready' }, '*');
   }
 
   // ---------- maker ----------
@@ -650,10 +687,14 @@ img{max-width:100%;display:block}
     const c = [...document.querySelectorAll('#cols input[type=color]')].map((i) => i.value);
     return clean({ bf: v('bf'), gf: v('gf'), ff: v('ff'), o: v('op'), n: v('nt'), d: v('dt'), h: v('tm'), p, c, ct: v('dct') });
   }
-  let pvTimer = 0, pvCode = '', pvL = 'fr', shL = 'fr', lastX = null;
+  let pushLater = false, pvTimer = 0, pvCode = '', pvL = 'fr', shL = 'fr', lastX = null;
   const pressLang = (box, l) => box.querySelectorAll('button').forEach((b) => b.setAttribute('aria-pressed', b.dataset.l === l));
   const VIEWS = { env: '?preview=1' };
-  function loadPhones() { document.querySelectorAll('#phones .phone').forEach((ph) => { ph.querySelector('iframe').src = location.pathname + VIEWS[ph.dataset.v] + '#i=' + pvCode; }); }
+  let pvReady = false, pvTo = '';
+  const pvFrame = () => document.querySelector('#phones .phone iframe');
+  function loadPhones() { pvReady = false; document.querySelectorAll('#phones .phone').forEach((ph) => { ph.querySelector('iframe').src = location.pathname + VIEWS[ph.dataset.v] + '&r=' + Date.now() + '#i=' + pvCode; }); }
+  function pushPhone(msg) { const f = pvFrame(); if (pvReady && f && f.contentWindow) f.contentWindow.postMessage(Object.assign({ k: 'eclaire-pv' }, msg), '*'); }
+  addEventListener('message', (e) => { const f = pvFrame(); if (f && e.source === f.contentWindow && e.data && e.data.k === 'eclaire-pv-ready') { pvReady = true; if (pushLater) { pushLater = false; pushPhone({ code: pvCode }); } if (pvTo) pushPhone({ to: pvTo }); } });
   function preview() {
     const x = readForm();
     try { localStorage.setItem('eclaire-invite-v4', JSON.stringify(x)); } catch (e) {}
@@ -661,7 +702,8 @@ img{max-width:100%;display:block}
     clearTimeout(pvTimer);
     pvTimer = setTimeout(async () => {
       const y = Object.assign({}, x, { bf: x.bf || 'Salma', gf: x.gf || 'Youssef', d: x.d || defaultDate() });
-      y.l = pvL; pvCode = await encode(y); loadPhones();
+      y.l = pvL; pvCode = await encode(y);
+      if (pvReady) pushPhone({ code: pvCode }); else if (!pvFrame().src) loadPhones(); else pushLater = true;
     }, 450);
   }
   const defaultDate = () => new Date(Date.now() + 90 * 864e5).toISOString().slice(0, 10);
@@ -722,8 +764,13 @@ img{max-width:100%;display:block}
     $('#addRow').addEventListener('click', () => { if (document.querySelectorAll('.prow').length < 7) { $('#prows').append(progRow()); preview(); } });
     $('#addCol').addEventListener('click', () => { if (document.querySelectorAll('#cols input').length < 5) { $('#cols').append(colInput('#c8b49a')); preview(); } });
     $('#delCol').addEventListener('click', () => { const l = $('#cols').lastElementChild; if (l) { l.remove(); preview(); } });
-    $('#replay').addEventListener('click', () => { const f = document.querySelector('.phone[data-v=env] iframe'); try { f.contentWindow.location.reload(); } catch (e) { loadPhones(); } });
+    $('#replay').addEventListener('click', () => { pvTo = ''; loadPhones(); });
     $('#form').addEventListener('submit', create);
+    const AREA = { bf: 'cover', gf: 'cover', op: 'cover', ff: 'top', nt: 'top', dt: 'top', tm: 'top', dct: 'dress' };
+    $('#form').addEventListener('focusin', (e) => {
+      const id = e.target.id, to = AREA[id] || (e.target.closest('#prows') ? 'prog' : e.target.closest('#cols') ? 'dress' : '');
+      if (to && to !== pvTo) { pvTo = to; pushPhone({ to }); }
+    });
     $('#pvLang').addEventListener('click', (e) => { const b = e.target.closest('[data-l]'); if (!b) return; pvL = b.dataset.l; pressLang($('#pvLang'), pvL); preview(); });
     $('#shLang').addEventListener('click', (e) => { const b = e.target.closest('[data-l]'); if (b) shareIn(b.dataset.l); });
     $('#copy').addEventListener('click', async () => {
