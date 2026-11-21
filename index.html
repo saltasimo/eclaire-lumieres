@@ -53,7 +53,7 @@ button{font:inherit;color:inherit}
   linear-gradient(180deg,rgba(12,10,8,.5) 0%,rgba(12,10,8,0) 22%)}
 
 /* top bar */
-.top{position:absolute;left:0;right:150px;top:0;display:flex;align-items:flex-start;justify-content:flex-start;gap:20px;padding:clamp(18px,2.4vw,34px) clamp(20px,4vw,64px)}
+.top{position:absolute;left:0;right:0;top:0;display:flex;align-items:flex-start;justify-content:flex-start;gap:20px;padding:clamp(18px,2.4vw,34px) clamp(20px,4vw,64px)}
 .logo{display:block;width:clamp(86px,8vw,118px);aspect-ratio:784/592;background:var(--white);-webkit-mask:url(brand/lockup-ivory.png) center/contain no-repeat;mask:url(brand/lockup-ivory.png) center/contain no-repeat}
 .top .logo{position:absolute;left:calc(50% + 75px);top:clamp(16px,2.2vw,30px);transform:translateX(-50%);width:clamp(96px,9vw,132px);filter:drop-shadow(0 2px 14px rgba(0,0,0,.55))}
 .place{display:flex;flex-direction:column;align-items:flex-start;gap:4px;margin-top:10px}
@@ -82,7 +82,7 @@ button{font:inherit;color:inherit}
 .pill-dark .play .ic{width:10px;height:10px;fill:currentColor;stroke:none}
 
 /* glass strip */
-.strip{position:absolute;top:0;right:0;bottom:0;width:150px;background:var(--glass);-webkit-backdrop-filter:blur(18px) saturate(115%);backdrop-filter:blur(18px) saturate(115%);box-shadow:inset 1px 0 0 var(--glass-line);display:flex;flex-direction:column;align-items:center;padding:clamp(16px,2.2vw,30px) 0}
+.strip{position:absolute;z-index:3;top:clamp(10px,1.6vw,22px);right:clamp(12px,2.6vw,44px)}
 .menu{all:unset;cursor:pointer;display:grid;place-items:center;width:44px;height:44px;border-radius:12px}
 .menu .ic{width:24px;height:24px}
 .nav{flex:1;display:flex;align-items:center;gap:14px;margin-left:-60px}
@@ -220,10 +220,6 @@ button{font:inherit;color:inherit}
 
   <aside class="strip" aria-label="Les étapes de la visite">
     <button class="menu" type="button" id="open-menu" aria-label="Menu"><svg class="ic" aria-hidden="true"><use href="#i-menu"/></svg></button>
-    <div class="tour" aria-hidden="true">
-      <span class="round"><svg class="ic"><use href="#i-play"/></svg></span>
-      <p><b>Visite filmée</b>Faites défiler pour avancer dans la salle</p>
-    </div>
   </aside>
 
 
@@ -533,7 +529,10 @@ button{font:inherit;color:inherit}
   });
 
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(placeConnector);
+  if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+  scrollTo(0, 0);
   layout(); readScroll(); setScene(0); pump(); tick();
+  addEventListener('pageshow', e => { if (e.persisted) { scrollTo(0, 0); readScroll(); tick(); } });
 })();
 </script>
 
