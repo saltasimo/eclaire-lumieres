@@ -330,10 +330,11 @@ button{font:inherit;color:inherit}
   const add = k => { if (k >= 0 && k < M && !seen.has(k)) { seen.add(k); loOrder.push(k); } };
   [32, 16, 8, 4, 2, 1].forEach(st => { for (let i = 0; i < N; i += st) add(BK[i]); });
   for (let k = 0; k < M; k++) add(k);
-  const hiFirst = [0, 60, 110, 146, 190, 239].map(i => BK[i]);
+  const hiFirst = [0, 60, 110, 146, 190, 239, 128, 133].map(i => BK[i]);
   let loNext = 0, active = 0;
   function nextHi() {
     while (hiFirst.length) { const k = hiFirst.shift(); if (!asked[k]) return k; }
+    if (!vFail) return -1;   /* the sharp film comes from the video; frames only if it fails */
     const c = lower(target);
     for (let d = 0; d < M; d++) {
       if (c + d < M && !asked[c + d]) return c + d;
@@ -360,6 +361,34 @@ button{font:inherit;color:inherit}
     }
   }
   const pic = k => ok[k] ? imgs[k] : lok[k] ? lo[k] : null;
+
+  /* the real film: a video scrubbed by the scroll, loaded whole so every seek is instant */
+  const VSRC = DIR === 'frames/m/' ? 'film/m.mp4' : 'film/d.mp4';
+  const video = document.createElement('video');
+  video.muted = true; video.playsInline = true; video.preload = 'auto';
+  video.setAttribute('muted', ''); video.setAttribute('playsinline', '');
+  let vReady = false, vFail = false, vWant = -1;
+  const vFallback = () => { if (!vReady) { vFail = true; pump(); } };
+  function vSeek(t) {
+    vWant = Math.min(t, (video.duration || DUR) - 0.02);
+    if (!video.seeking && Math.abs(video.currentTime - vWant) > 0.01) video.currentTime = vWant;
+  }
+  video.addEventListener('seeked', () => {
+    if (Math.abs(video.currentTime - vWant) > 0.01) video.currentTime = vWant;
+    dirty = true; tick();
+  });
+  video.addEventListener('error', vFallback);
+  function loadVideo() {
+    fetch(VSRC).then(r => { if (!r.ok) throw 0; return r.blob(); }).then(b => {
+      video.src = URL.createObjectURL(b);
+      video.addEventListener('loadeddata', () => {
+        const go = () => { video.pause(); vReady = true; vSeek(shown < 0 ? target : shown); };
+        const p = video.play(); p && p.then ? p.then(go, go) : go();
+      }, { once: true });
+      video.load();
+    }).catch(vFallback);
+  }
+  loadVideo();
   function nearest(k) {
     for (let d = 0; d < M; d++) {
       if (k - d >= 0 && pic(k - d)) return k - d;
@@ -379,14 +408,18 @@ button{font:inherit;color:inherit}
     placeConnector();
   }
   function cover(c, im, w, h) {
-    const s = Math.max(w / im.naturalWidth, h / im.naturalHeight);
-    const dw = im.naturalWidth * s, dh = im.naturalHeight * s;
+    const iw = im.videoWidth || im.naturalWidth, ih = im.videoHeight || im.naturalHeight;
+    const s = Math.max(w / iw, h / ih);
+    const dw = iw * s, dh = ih * s;
     c.drawImage(im, (w - dw) / 2, (h - dh) / 2, dw, dh);
   }
   /* 16.0 to 16.55 s the camera brushes past a chair: replaced by a soft dissolve */
   const G0 = 16.0, G1 = 16.55;
   function draw(t, settled) {
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    if (vReady && !(t > G0 && t < G1)) {
+      vSeek(t); cover(ctx, video, W, H); cover(bctx, video, 320, 180); return;
+    }
     let k0, k1, frac;
     if (t > G0 && t < G1) {
       k0 = lower(G0); k1 = lower(G1); if (TT[k1] < G1) k1 = Math.min(M - 1, k1 + 1);
