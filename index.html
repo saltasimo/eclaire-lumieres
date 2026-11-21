@@ -322,32 +322,48 @@ button{font:inherit;color:inherit}
   LIST.sort((a, b) => a.t - b.t);
   const M = LIST.length, TT = LIST.map(f => f.t), BK = new Int32Array(N);
   LIST.forEach((f, k) => { if (f.b >= 0) BK[f.b] = k; });
-  const imgs = new Array(M), ok = new Uint8Array(M);
-  const order = [], seen = new Set();
-  const add = k => { if (k >= 0 && k < M && !seen.has(k)) { seen.add(k); order.push(k); } };
-  [0, 60, 110, 146, 190, 239].forEach(i => add(BK[i]));
-  [32, 16].forEach(st => { for (let i = 0; i < N; i += st) add(BK[i]); });
-  const FIRST = order.length;
-  [8, 4, 2, 1].forEach(st => { for (let i = 0; i < N; i += st) add(BK[i]); });
+  /* two layers: a tiny blurred copy of every frame loads first so the film scrubs smoothly
+     from the start, then the sharp frames replace it, nearest to where the visitor is first */
+  const LO = DIR + 'l/';
+  const imgs = new Array(M), ok = new Uint8Array(M), lo = new Array(M), lok = new Uint8Array(M), asked = new Uint8Array(M);
+  const loOrder = [], seen = new Set();
+  const add = k => { if (k >= 0 && k < M && !seen.has(k)) { seen.add(k); loOrder.push(k); } };
+  [32, 16, 8, 4, 2, 1].forEach(st => { for (let i = 0; i < N; i += st) add(BK[i]); });
   for (let k = 0; k < M; k++) add(k);
-  /* the stops load at once; the rest waits for the first gesture or a quiet moment */
-  let next = 0, active = 0, gate = FIRST;
-  const open = () => { if (gate < order.length) { gate = order.length; pump(); } };
-  ['scroll', 'wheel', 'touchstart', 'pointerdown', 'keydown'].forEach(e => addEventListener(e, open, { once: true, passive: true }));
-  addEventListener('load', () => setTimeout(open, 2500));
+  const hiFirst = [0, 60, 110, 146, 190, 239].map(i => BK[i]);
+  let loNext = 0, active = 0;
+  function nextHi() {
+    while (hiFirst.length) { const k = hiFirst.shift(); if (!asked[k]) return k; }
+    const c = lower(target);
+    for (let d = 0; d < M; d++) {
+      if (c + d < M && !asked[c + d]) return c + d;
+      if (c - d >= 0 && !asked[c - d]) return c - d;
+    }
+    return -1;
+  }
   function pump() {
-    while (active < 6 && next < gate) {
-      const k = order[next++]; active++;
+    while (active < 6) {
+      let k, hi;
+      if (hiFirst.length && active < 3) { k = nextHi(); hi = true; }
+      else if (loNext < loOrder.length) { k = loOrder[loNext++]; hi = false; }
+      else { k = nextHi(); hi = true; }
+      if (k < 0) return;
+      if (hi) asked[k] = 1;
+      active++;
       const im = new Image(); im.decoding = 'async';
-      const done = good => { if (good) { imgs[k] = im; ok[k] = 1; } active--; dirty = true; tick(); pump(); };
+      const done = good => {
+        if (good) { if (hi) { imgs[k] = im; ok[k] = 1; } else { lo[k] = im; lok[k] = 1; } }
+        active--; dirty = true; tick(); pump();
+      };
       im.onload = () => done(true); im.onerror = () => done(false);
-      im.src = LIST[k].s;
+      im.src = hi ? LIST[k].s : LO + LIST[k].s.slice(DIR.length);
     }
   }
+  const pic = k => ok[k] ? imgs[k] : lok[k] ? lo[k] : null;
   function nearest(k) {
     for (let d = 0; d < M; d++) {
-      if (k - d >= 0 && ok[k - d]) return k - d;
-      if (k + d < M && ok[k + d]) return k + d;
+      if (k - d >= 0 && pic(k - d)) return k - d;
+      if (k + d < M && pic(k + d)) return k + d;
     }
     return -1;
   }
@@ -380,11 +396,12 @@ button{font:inherit;color:inherit}
       const span = TT[k1] - TT[k0]; frac = span > 0 ? (t - TT[k0]) / span : 0;
       if (settled) { if (frac > 0.5) k0 = k1; frac = 0; }
     }
-    const a = ok[k0] ? k0 : nearest(k0);
+    const a = pic(k0) ? k0 : nearest(k0);
     if (a < 0) return;
-    ctx.globalAlpha = 1; cover(ctx, imgs[a], W, H);
-    if (a === k0 && ok[k1] && frac > 0.02) { ctx.globalAlpha = frac; cover(ctx, imgs[k1], W, H); ctx.globalAlpha = 1; }
-    cover(bctx, imgs[a], 320, 180);
+    const ia = pic(a), ib = pic(k1);
+    ctx.globalAlpha = 1; cover(ctx, ia, W, H);
+    if (a === k0 && ib && frac > 0.02) { ctx.globalAlpha = frac; cover(ctx, ib, W, H); ctx.globalAlpha = 1; }
+    cover(bctx, ia, 320, 180);
   }
 
   /* scroll -> film time, mapped so the camera moves at an even pace: slow moments take less scroll,
