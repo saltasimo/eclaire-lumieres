@@ -2,6 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="utf-8">
+<link rel="icon" type="image/png" href="../brand/favicon.png">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#ddd2c4">
 <title>Invitation · Eclaire</title>
@@ -452,7 +453,13 @@ img{max-width:100%;display:block}
   // ---------- builders ----------
   function el(tag, cls, text) { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
   function sprig(cls = 'sprig') { const ns = 'http://www.w3.org/2000/svg'; const s = document.createElementNS(ns, 'svg'); if (cls) s.setAttribute('class', cls); s.setAttribute('viewBox', '0 0 130 40'); s.setAttribute('aria-hidden', 'true'); const u = document.createElementNS(ns, 'use'); u.setAttribute('href', '#sprig'); s.append(u); return s; }
-  function img(src, alt) { const i = el('img'); i.src = src; i.alt = alt; i.decoding = 'async'; return i; }
+  /* phones get the 800 px copy, large screens the full one; pictures below the fold wait until they are near */
+  function img(src, alt) {
+    const i = el('img'); i.alt = alt; i.decoding = 'async'; i.loading = 'lazy';
+    const m = /^img\/([a-z]+)\.webp$/.exec(src);
+    if (m) { i.srcset = 'img/m/' + m[1] + '.webp 800w, ' + src + ' 1600w'; i.sizes = '(max-width: 640px) 100vw, 560px'; }
+    i.src = src; return i;
+  }
   const mapUrl = (x) => x.m || 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent('Eclaire Weddings & Events Salé');
   const slug = (s) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/gi, '-').toLowerCase() || 'x';
   const initial = (s) => (s || '').trim().charAt(0).toUpperCase();

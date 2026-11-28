@@ -2,12 +2,15 @@
 <html lang="fr">
 <head>
 <meta charset="utf-8">
+<link rel="icon" type="image/png" href="../brand/favicon.png">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#0b0908">
 <title>Eclaire Lumières</title>
 <meta name="robots" content="noindex, nofollow">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Manrope:wght@400;600;800&family=Playfair+Display:wght@700;900&display=swap">
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Manrope:wght@400;600;800&family=Playfair+Display:wght@700;900&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Manrope:wght@400;600;800&family=Playfair+Display:wght@700;900&display=swap" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Manrope:wght@400;600;800&family=Playfair+Display:wght@700;900&display=swap"></noscript>
 <style>
 :root{
   --night:#0b0908; --panel:#17130f; --raise:#221c16;
@@ -46,6 +49,10 @@ button{cursor:pointer}
   background:linear-gradient(to top,rgba(11,9,8,.97) 65%,rgba(11,9,8,0))}
 .gate p{margin:0;max-width:36ch;color:var(--mute);font-size:13px;text-wrap:balance}
 .gate .warn{color:var(--ink);font-size:15px}
+/* while the start panel is up, the logo sits in the free space above it instead of under the text */
+#guest .stage{transition:padding-bottom .5s}
+#guest:has(.gate:not([hidden])) .stage{padding-bottom:var(--gateH,0px)}
+#guest:has(.gate:not([hidden])) .stage .mark{transform:scale(.8)}
 .pill{border:1px solid var(--gold);background:var(--gold);color:var(--night);font-weight:800;letter-spacing:.14em;text-transform:uppercase;
   font-size:13px;padding:15px 30px;border-radius:999px}
 .textlink{color:var(--mute);font-size:12px;letter-spacing:.12em;text-transform:uppercase;text-decoration:none;border:0;background:none;border-bottom:1px solid var(--line);padding:0 0 2px}
@@ -295,10 +302,11 @@ button{cursor:pointer}
   </div>
 </main>
 
-<script src="../vendor/mqtt.min.js"></script>
-<script src="../vendor/qrcode.js"></script>
+<script src="../vendor/mqtt.min.js" defer></script>
+<script src="../vendor/qrcode.js" defer></script>
 <script>
-(() => {
+addEventListener('DOMContentLoaded', () => {
+  { const g = document.getElementById('gate'), set = () => document.documentElement.style.setProperty('--gateH', g.offsetHeight * 0.8 + 'px'); set(); if (window.ResizeObserver) new ResizeObserver(set).observe(g); }
   const $ = (s) => document.querySelector(s);
   const now = () => performance.timeOrigin + performance.now();
   const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
@@ -945,7 +953,7 @@ button{cursor:pointer}
   }
   requestAnimationFrame(frame);
   window.__eclaire = { get S() { return S; }, get offset() { return offset; }, get torch() { return torch; }, look, torchFor };
-})();
+});
 </script>
 </body>
 </html>
